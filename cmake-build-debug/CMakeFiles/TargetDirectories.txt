@@ -1,0 +1,3 @@
+/home/saxatachi/CLionProjects/master/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/saxatachi/CLionProjects/master/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/saxatachi/CLionProjects/master/cmake-build-debug/CMakeFiles/master.dir

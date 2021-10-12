@@ -1,0 +1,6 @@
+/snap/clion/164/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /home/saxatachi/CLionProjects/master
+-- Reading /usr/local/lib/cmake/libLAS/liblas-config.cmake
+-- libLAS configuration, version 1.8.2b1
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/saxatachi/CLionProjects/master/cmake-build-debug
