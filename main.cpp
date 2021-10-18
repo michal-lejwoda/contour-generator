@@ -31,19 +31,54 @@ int main() {
 //    grid.generateGrid(header,reader, tab);
 
 
-GDALDataset  *poDataset;
+    GDALDataset  *poDataset,*pNewDS;
+    GDALDriver *pDriverTiff;
     char const * pszFilename = "/home/saxatachi/Desktop/inter_raster.tif";
+    char const * output = "/home/saxatachi/Desktop/new.tif";
 //    GDALAllRegister();
     poDataset = (GDALDataset *) GDALOpen( pszFilename, GA_ReadOnly );
     if( poDataset == NULL )
     {
         cout<<"null"<<endl;
     }else{
-        int blockXSize, blockYSize;
-        GDALDataset  *dataset;
-        GDALRasterBand *currentBand;
-        currentBand = dataset->GetRasterBand(1);
-        currentBand->GetBlockSize(&blockXSize, &blockYSize);
+
+        int nRows, nCols;
+        double noData;
+        double transform[6];
+
+        nCols = poDataset->GetRasterBand(1)->GetXSize();
+        nRows = poDataset->GetRasterBand(1)->GetYSize();
+        noData = poDataset->GetRasterBand(1)->GetNoDataValue();
+        poDataset->GetGeoTransform(transform);
+        pDriverTiff = GetGDALDriverManager()->GetDriverByName("GTiff");
+        pNewDS = pDriverTiff->Create(output,nCols,nRows,1,GDT_Float32,NULL);
+        float *oldRow = (float*) CPLMalloc(sizeof(float)*nCols);
+        float *newRow = (float*) CPLMalloc(sizeof(float)*nCols);
+
+        for(int i=0;i<nRows;i++){
+            poDataset->GetRasterBand(1)->RasterIO(GF_Read,0,i,nCols,1,oldRow,nCols,1,GDT_Float32,0,0);
+            for(int j=0;j<nCols;j++){
+                if(oldRow[j] == noData){
+                    newRow[j] = noData;
+                }else{
+                    newRow[j] = oldRow[j] + 10;
+                }
+            }
+            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,nCols,1,newRow,nCols,1,GDT_Float32,0,0);
+        }
+
+        GDALClose(poDataset);
+        GDALClose(pNewDS);
+        GDALDestroyDriverManager();
+
+
+
+
+//        cout<<poDataset->GetRasterXSize()<<endl;
+//        cout<<poDataset->GetRasterYSize()<<endl;
+//        cout<<poDataset->GetRasterCount()<<endl;
+
+
     }
 
 
