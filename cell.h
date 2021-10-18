@@ -3,15 +3,15 @@
 #include<iostream>
 #include <liblas/liblas.hpp>
 #include <liblas/header.hpp>
+//#include <vector>
 
 using namespace std;
 struct Cell {
-//    float centerx;
-//    float centery;
-    float minx;
-    float miny;
-    float maxx;
-    float maxy;
+    float centerx;
+    float centery;
+    vector<liblas::Point> points;
+    vector<float> distance;
+    float value;
 };
 
 #endif //MASTER_CELL_H
