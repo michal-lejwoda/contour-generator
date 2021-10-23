@@ -8,8 +8,8 @@
 using namespace std;
 class Grid{
 public:
-    void generateGrid(liblas::Header,liblas::Reader,Cell[391][307]);
-    void distance_beetween_points(liblas::Reader,Cell[391][307]);
-    void idw(Cell[391][307]);
+    void generateGrid(liblas::Header,liblas::Reader,Cell[268][180]);
+    void distance_beetween_points(liblas::Header,liblas::Reader,Cell[268][180]);
+    void idw(Cell[268][180]);
 };
 #endif

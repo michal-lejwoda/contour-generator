@@ -7,11 +7,13 @@
 
 using namespace std;
 struct Cell {
-    float centerx;
-    float centery;
+    double centerx;
+    double centery;
     vector<liblas::Point> points;
-    vector<float> distance;
-    float value;
+    vector<double> distance;
+    double value;
+
 };
+
 
 #endif //MASTER_CELL_H

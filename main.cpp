@@ -23,12 +23,19 @@ int main() {
     cout<<"lidar x"<<header.GetExtent().minx()<<" "<<header.GetExtent().maxx()<<endl;
     int minx = (header.GetMaxX() - header.GetMinX())/cellsize;
     int miny = (header.GetMaxY() - header.GetMinY())/cellsize;
+    cout.precision(15);
+    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/0.4457665585349638859)<<endl;
+    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/0.4457665585324316337)<<endl;
+    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/0.5)<<endl;
+    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/0.5)<<endl;
     cout<<"diff x"<<minx/cellsize<<endl;
     cout<<"diff y"<<miny/cellsize<<endl;
-    Cell tab[391][307];
+    Cell tab[268][180];
     // Generowanie Rastra
-//    Grid grid;
-//    grid.generateGrid(header,reader, tab);
+    Grid grid;
+    grid.generateGrid(header,reader, tab);
+    grid.distance_beetween_points(header,reader,tab);
+    grid.idw(tab);
 
 
     GDALDataset  *poDataset,*pNewDS;
@@ -45,15 +52,21 @@ int main() {
         int nRows, nCols;
         double noData;
         double transform[6];
-
         nCols = poDataset->GetRasterBand(1)->GetXSize();
         nRows = poDataset->GetRasterBand(1)->GetYSize();
         noData = poDataset->GetRasterBand(1)->GetNoDataValue();
+        cout<<"nCols "<<nCols<<endl;
+        cout<<"nRows "<<nRows<<endl;
         poDataset->GetGeoTransform(transform);
+        for(int i=0;i<6;i++){
+            cout<<"element"<<transform[i]<<endl;
+        }
         pDriverTiff = GetGDALDriverManager()->GetDriverByName("GTiff");
         pNewDS = pDriverTiff->Create(output,nCols,nRows,1,GDT_Float32,NULL);
         float *oldRow = (float*) CPLMalloc(sizeof(float)*nCols);
         float *newRow = (float*) CPLMalloc(sizeof(float)*nCols);
+        cout<<"alokowanie"<<endl;
+        cout<<sizeof(float)*nCols<<endl;
 
         for(int i=0;i<nRows;i++){
             poDataset->GetRasterBand(1)->RasterIO(GF_Read,0,i,nCols,1,oldRow,nCols,1,GDT_Float32,0,0);
@@ -61,6 +74,7 @@ int main() {
                 if(oldRow[j] == noData){
                     newRow[j] = noData;
                 }else{
+//                    cout<<oldRow[j]<<endl;
                     newRow[j] = oldRow[j] + 10;
                 }
             }
@@ -73,7 +87,7 @@ int main() {
 
 
 
-
+        cout<<"rozmiar "<<sizeof(vector<liblas::Point>)<<endl;
 //        cout<<poDataset->GetRasterXSize()<<endl;
 //        cout<<poDataset->GetRasterYSize()<<endl;
 //        cout<<poDataset->GetRasterCount()<<endl;
