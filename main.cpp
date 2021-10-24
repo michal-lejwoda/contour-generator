@@ -32,10 +32,14 @@ int main() {
     cout<<"diff y"<<miny/cellsize<<endl;
     Cell tab[268][180];
     // Generowanie Rastra
+    clock_t start = clock();
     Grid grid;
     grid.generateGrid(header,reader, tab);
     grid.distance_beetween_points(header,reader,tab);
     grid.idw(tab);
+    clock_t end = clock();
+    double elapsed = double(end - start)/CLOCKS_PER_SEC;
+    printf("Time measured: %.3f seconds.\n", elapsed);
 
 
     GDALDataset  *poDataset,*pNewDS;
