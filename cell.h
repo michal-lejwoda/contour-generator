@@ -12,8 +12,13 @@ struct Cell {
     vector<liblas::Point> points;
     vector<double> distance;
     double value;
-
 };
 
+struct LineCell {
+    double topleft;
+    double topright;
+    double bottomleft;
+    double bottomright;
+};
 
 #endif //MASTER_CELL_H

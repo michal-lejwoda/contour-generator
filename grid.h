@@ -11,5 +11,6 @@ public:
     void generateGrid(liblas::Header,liblas::Reader,Cell[268][180]);
     void distance_beetween_points(liblas::Header,liblas::Reader,Cell[268][180]);
     void idw(Cell[268][180]);
+    void generateLines(Cell[268][180]);
 };
 #endif

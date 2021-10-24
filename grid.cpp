@@ -53,11 +53,11 @@ void Grid::distance_beetween_points(liblas::Header header,liblas::Reader reader,
     liblas::Point const& p = reader.GetPoint();
     int count = 0;
     while (reader.ReadNextPoint()) {
-        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
-            count++;
-        } else {
-            continue;
-        }
+//        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
+//            count++;
+//        } else {
+//            continue;
+//        }
         int x = floor((p.GetX() - header.GetMinX()) / cellsize);
         int y = floor((header.GetMaxY() - p.GetY()) / cellsize);
         if(x == 268){
@@ -116,7 +116,7 @@ void Grid::idw(Cell tab[268][180]){
                 tab[i][j].value = result;
                 cout << "tab[" << i << "]" << "[" << j << "] = " << result << endl;
             }else{
-                tab[i][j].value = result;
+                tab[i][j].value = 75;
                 cout << "tab[" << i << "]" << "[" << j << "] = " << 0 << endl;
             }
         }

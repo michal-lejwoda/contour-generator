@@ -50,6 +50,8 @@ int main() {
     }else{
 
         int nRows, nCols;
+        int rows = 268;
+        int columns = 180;
         double noData;
         double transform[6];
         nCols = poDataset->GetRasterBand(1)->GetXSize();
@@ -62,37 +64,36 @@ int main() {
             cout<<"element"<<transform[i]<<endl;
         }
         pDriverTiff = GetGDALDriverManager()->GetDriverByName("GTiff");
-        pNewDS = pDriverTiff->Create(output,nCols,nRows,1,GDT_Float32,NULL);
+        pNewDS = pDriverTiff->Create(output,columns,rows,1,GDT_Float32,NULL);
         float *oldRow = (float*) CPLMalloc(sizeof(float)*nCols);
         float *newRow = (float*) CPLMalloc(sizeof(float)*nCols);
         cout<<"alokowanie"<<endl;
         cout<<sizeof(float)*nCols<<endl;
+        float *newwRow = (float*) CPLMalloc(sizeof(float)*columns);
 
-        for(int i=0;i<nRows;i++){
-            poDataset->GetRasterBand(1)->RasterIO(GF_Read,0,i,nCols,1,oldRow,nCols,1,GDT_Float32,0,0);
-            for(int j=0;j<nCols;j++){
-                if(oldRow[j] == noData){
-                    newRow[j] = noData;
-                }else{
-//                    cout<<oldRow[j]<<endl;
-                    newRow[j] = oldRow[j] + 10;
-                }
+
+//        for(int i=0;i<nRows;i++){
+//            poDataset->GetRasterBand(1)->RasterIO(GF_Read,0,i,nCols,1,oldRow,nCols,1,GDT_Float32,0,0);
+//            for(int j=0;j<nCols;j++){
+//                if(oldRow[j] == noData){
+//                    newRow[j] = noData;
+//                }else{
+////                    cout<<oldRow[j]<<endl;
+//                    newRow[j] = oldRow[j] + 10;
+//                }
+//            }
+//            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,nCols,1,newRow,nCols,1,GDT_Float32,0,0);
+//        }
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<columns;j++){
+                newwRow[j] = tab[i][j].value;
             }
-            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,nCols,1,newRow,nCols,1,GDT_Float32,0,0);
+            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,columns,1,newwRow,columns,1,GDT_Float32,0,0);
         }
 
         GDALClose(poDataset);
         GDALClose(pNewDS);
         GDALDestroyDriverManager();
-
-
-
-        cout<<"rozmiar "<<sizeof(vector<liblas::Point>)<<endl;
-//        cout<<poDataset->GetRasterXSize()<<endl;
-//        cout<<poDataset->GetRasterYSize()<<endl;
-//        cout<<poDataset->GetRasterCount()<<endl;
-
-
     }
 
 
