@@ -96,55 +96,45 @@ void Grid::distance_beetween_points(liblas::Header header,liblas::Reader reader,
 //    cout<<"liczba elementow w tab = "<<tab[56][76].points.size()<<endl;
 }
 double Grid::neighbours(int x,int y,Cell tab[268][180]){
-    cout<<"neighbours"<<endl;
     if(tab[x-1][y-1].points.size()>0){
         tab[x][y].value = tab[x-1][y-1].points[0].GetZ();
         return tab[x][y].value;
     }
     if(tab[x][y-1].points.size()>0){
-        cout<<"ma liczbę"<<endl;
         tab[x][y].value = tab[x][y-1].points[0].GetZ();
         return tab[x][y].value;
     }
     if(tab[x+1][y-1].points.size()>0){
-        cout<<"ma liczbę"<<endl;
         tab[x][y].value = tab[x+1][y-1].points[0].GetZ();
         return tab[x][y].value;
     }
     if(tab[x-1][y].points.size()>0){
-        cout<<"ma liczbę"<<endl;
         tab[x][y].value = tab[x-1][y].points[0].GetZ();
         return tab[x][y].value;
     }
     if(tab[x+1][y].points.size()>0){
-        cout<<"ma liczbę"<<endl;
         tab[x][y].value = tab[x+1][y].points[0].GetZ();
         return tab[x][y].value;
     }
     if(tab[x-1][y+1].points.size()>0){
-        cout<<"ma liczbę"<<endl;
         tab[x][y].value = tab[x-1][y+1].points[0].GetZ();
         return tab[x][y].value;
     }
     if(tab[x][y+1].points.size()>0){
-        cout<<"ma liczbę"<<endl;
         tab[x][y].value = tab[x][y+1].points[0].GetZ();
         return tab[x][y].value;
     }
     if(tab[x+1][y+1].points.size()>0){
-        cout<<"ma liczbę"<<endl;
         tab[x][y].value = tab[x+1][y+1].points[0].GetZ();
         return tab[x][y].value;
     }
     else{
         return tab[x][y].value = 74;
-        return tab[x][y].value;
     }
 
 }
 void Grid::idw(Cell tab[268][180]){
     cout<<"algorytm idw"<<endl;
-    cout<<"tab[268][179]"<<tab[178][80].points.size()<<endl;
     for(int i=0;i<268;i++){
         for(int j=0;j<180;j++){
             cout<<"tab["<<i<<"]"<<"["<<j<<"]"<<tab[i][j].points.size()<<endl;
@@ -153,10 +143,8 @@ void Grid::idw(Cell tab[268][180]){
             double result2 = 0;
             double temp = 0;
             int size = tab[i][j].points.size();
-            cout<<"size = "<<size<<endl;
             if(size>0) {
                 for (int k = 0; k < size; k++) {
-//                cout<<tab[i][j].points[k].GetZ()<<endl;
                     result1 = result1 + (tab[i][j].points[k].GetZ() / tab[i][j].distance[k]);
                     result2 = result2 + (1 / tab[i][j].distance[k]);
                     if(tab[i][j].distance[k] == 0){
@@ -165,11 +153,6 @@ void Grid::idw(Cell tab[268][180]){
                 }
 
                 result = result1 / result2;
-//                if(i == 184 and j == 113){
-//                    cout<<"koncowy rezultat"<<result1<<endl;
-//                    cout<<"koncowy rezultat"<<result2<<endl;
-//                    cout<<"koncowy rezultat"<<result<<endl;
-//                }
                 if(temp != 0){
 
                     tab[i][j].value = temp;
@@ -177,23 +160,11 @@ void Grid::idw(Cell tab[268][180]){
                 }else {
                     tab[i][j].value = result;
                 }
-//                cout << "tab[" << i << "]" << "[" << j << "] = " << result << endl;
             }else{
                 neighbours(i,j,tab);
 //                tab[i][j].value = 75;
-//                cout << "tab[" << i << "]" << "[" << j << "] = " << 0 << endl;
             }
         }
     }
 
-//    for(int i=0;i<size;i++){
-//        cout<<tab[24][12].points[i].GetZ()<<endl;
-//        cout<<"odleglosc "<<tab[24][12].distance[i]<<endl;
-//        ((tab[24][12].points[i].GetZ()/tab[24][12].distance[i]))
-//        result1 = result1 +(tab[24][12].points[i].GetZ()/tab[24][12].distance[i]);
-//        result2 = result2 + (1/tab[24][12].distance[i]);
-//    }
-//    result = result1/result2;
-//    tab[24][12].value = result;
-//    cout<<"wynik"<<result<<endl;
 }
