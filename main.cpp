@@ -67,11 +67,14 @@ int main() {
         cout<<"nCols "<<nCols<<endl;
         cout<<"nRows "<<nRows<<endl;
         poDataset->GetGeoTransform(transform);
+        transform[1] = 0.5;
+        transform[5] = 0.5;
         for(int i=0;i<6;i++){
             cout<<"element"<<transform[i]<<endl;
         }
         pDriverTiff = GetGDALDriverManager()->GetDriverByName("GTiff");
         pNewDS = pDriverTiff->Create(output,columns,rows,1,GDT_Float32,NULL);
+        pNewDS->SetGeoTransform(transform);
         float *oldRow = (float*) CPLMalloc(sizeof(float)*nCols);
         float *newRow = (float*) CPLMalloc(sizeof(float)*nCols);
         cout<<"alokowanie"<<endl;
