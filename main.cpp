@@ -40,7 +40,10 @@ int main() {
     clock_t end = clock();
     double elapsed = double(end - start)/CLOCKS_PER_SEC;
     printf("Time measured: %.3f seconds.\n", elapsed);
-
+    cout<<"tab[162][105] = "<<tab[162][105].points[0].GetZ()<<endl;
+    cout<<"tab[162][105] = "<<tab[162][105].points[1].GetZ()<<endl;
+    cout<<"tab[162][105] = "<<tab[184][113].distance[0]<<endl;
+    cout<<"tab[162][105] = "<<tab[184][113].distance[1]<<endl;
 
     GDALDataset  *poDataset,*pNewDS;
     GDALDriver *pDriverTiff;
