@@ -23,14 +23,17 @@ int main() {
     cout<<"lidar x"<<header.GetExtent().minx()<<" "<<header.GetExtent().maxx()<<endl;
     int minx = (header.GetMaxX() - header.GetMinX())/cellsize;
     int miny = (header.GetMaxY() - header.GetMinY())/cellsize;
+
     cout.precision(15);
     cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/0.4457665585349638859)<<endl;
     cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/0.4457665585324316337)<<endl;
-    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/0.5)<<endl;
-    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/0.5)<<endl;
-    cout<<"diff x"<<minx/cellsize<<endl;
-    cout<<"diff y"<<miny/cellsize<<endl;
+    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/cellsize)<<endl;
+    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/cellsize)<<endl;
+//    cout<<"diff x"<<minx/cellsize<<endl;
+//    cout<<"diff y"<<miny/cellsize<<endl;
+
     Cell tab[268][180];
+//    Cell tab1[301][201];
     // Generowanie Rastra
     clock_t start = clock();
     Grid grid;
@@ -40,15 +43,11 @@ int main() {
     clock_t end = clock();
     double elapsed = double(end - start)/CLOCKS_PER_SEC;
     printf("Time measured: %.3f seconds.\n", elapsed);
-    cout<<"tab[162][105] = "<<tab[162][105].points[0].GetZ()<<endl;
-    cout<<"tab[162][105] = "<<tab[162][105].points[1].GetZ()<<endl;
-    cout<<"tab[162][105] = "<<tab[184][113].distance[0]<<endl;
-    cout<<"tab[162][105] = "<<tab[184][113].distance[1]<<endl;
 
     GDALDataset  *poDataset,*pNewDS;
     GDALDriver *pDriverTiff;
     char const * pszFilename = "/home/saxatachi/Desktop/inter_raster.tif";
-    char const * output = "/home/saxatachi/Desktop/new.tif";
+    char const * output = "/home/saxatachi/Desktop/neww.tif";
 //    GDALAllRegister();
     poDataset = (GDALDataset *) GDALOpen( pszFilename, GA_ReadOnly );
     if( poDataset == NULL )
@@ -73,12 +72,11 @@ int main() {
             cout<<"element"<<transform[i]<<endl;
         }
         pDriverTiff = GetGDALDriverManager()->GetDriverByName("GTiff");
-        pNewDS = pDriverTiff->Create(output,columns,rows,1,GDT_Float32,NULL);
+        pNewDS = pDriverTiff->Create(output,rows,columns,1,GDT_Float32,NULL);
         pNewDS->SetGeoTransform(transform);
         float *oldRow = (float*) CPLMalloc(sizeof(float)*nCols);
         float *newRow = (float*) CPLMalloc(sizeof(float)*nCols);
         cout<<"alokowanie"<<endl;
-        cout<<sizeof(float)*nCols<<endl;
         float *newwRow = (float*) CPLMalloc(sizeof(float)*columns);
 
 
@@ -98,7 +96,7 @@ int main() {
             for(int j=0;j<columns;j++){
                 newwRow[j] = tab[i][j].value;
             }
-            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,columns,1,newwRow,columns,1,GDT_Float32,0,0);
+            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,rows,1,newwRow,columns,1,GDT_Float32,0,0);
         }
 
         GDALClose(poDataset);

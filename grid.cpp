@@ -8,8 +8,8 @@ void Grid::generateGrid(liblas::Header header,liblas::Reader reader,Cell tab[268
     double cellsize = 0.5;
     double R = (cellsize * sqrt(2))/2;
     cout<<"generate grid"<<endl;
-    int minx = (header.GetMaxX() - header.GetMinX())/0.5;
-    int miny = (header.GetMaxY() - header.GetMinY())/0.5;
+    int minx = (header.GetMaxX() - header.GetMinX())/cellsize;
+    int miny = (header.GetMaxY() - header.GetMinY())/cellsize;
 
     for(int i=0;i<minx;i++){
         for(int j=0;j<miny;j++){
@@ -24,18 +24,14 @@ void Grid::distance_beetween_points(liblas::Header header,liblas::Reader reader,
     double cellsize = 0.5;
     double R = (cellsize * sqrt(2))/2;
     reader.ReadPointAt(1002);
-
-
     liblas::Point const& r = reader.GetPoint();
     int x = floor((r.GetX() - header.GetMinX())/cellsize);
     int y = floor((header.GetMaxY() - r.GetY())/cellsize);
-    cout<<"minus x"<<x<<endl;
-    cout<<"minus y"<<y<<endl;
     double result = sqrt(pow((tab[x][y].centerx)-r.GetX(),2)+pow((tab[x][y].centery)-r.GetY(),2));
     cout<<tab[x][y].centerx - r.GetX()<<endl;
     cout<<tab[x][y].centery - r.GetY()<<endl;
     if(result>R){
-        cout<<"Jest Większy"<<endl;
+
         for(int el=1;el<=ceil(1/cellsize);el++){
             for(int el2=1;el2<=ceil(1/cellsize);el2++){
                 float result2 = sqrt(pow((tab[x+el][y+el2].centerx)-r.GetX(),2)+pow((tab[x+el][y+el2].centery)-r.GetY(),2));
@@ -58,6 +54,11 @@ void Grid::distance_beetween_points(liblas::Header header,liblas::Reader reader,
 //        } else {
 //            continue;
 //        }
+        if(p.GetClassification().GetClass() == 2){
+            count++;
+        }else{
+            continue;
+        }
         int x = floor((p.GetX() - header.GetMinX()) / cellsize);
         int y = floor((header.GetMaxY() - p.GetY()) / cellsize);
         if(x == 268){
@@ -67,17 +68,13 @@ void Grid::distance_beetween_points(liblas::Header header,liblas::Reader reader,
 //        if (result > R) {
 //            cout<<x<<" oraz "<<y<<endl;
 //            for (int el = 1; el <= ceil(1 / cellsize); el++) {
-//                cout<<"el"<<el<<endl;
 //                for (int el2 = 1; el2 <= ceil(1 / cellsize); el2++) {
 //                    if(x+el>268 or y+el2>180){
-//                        cout<<"jest Większe"<<endl;
 //                        continue;
 //                    }
 //                    float result2 = sqrt(pow((tab[x + el][y + el2].centerx) - p.GetX(), 2) +
 //                                         pow((tab[x + el][y + el2].centery) - p.GetY(), 2));
 //                    if (result2 <= R) {
-//                        cout << "wynik w poprawnym for" << result2 << "tab[" << x + el << "][" << y + el2 << "]"
-//                             << endl;
 //                        cout<<x + el<<" oraz "<<y + el2<<endl;
 //                        tab[x + el][y + el2].points.push_back(p);
 //                        tab[x + el][y + el2].distance.push_back(result2);
@@ -86,8 +83,6 @@ void Grid::distance_beetween_points(liblas::Header header,liblas::Reader reader,
 //                }
 //            }
 //        } else {
-            cout<<"x = "<<x<<endl;
-            cout<<"y = "<<y<<endl;
             tab[x][y].points.push_back(p);
             tab[x][y].distance.push_back(result);
 //        }
@@ -129,7 +124,7 @@ double Grid::neighbours(int x,int y,Cell tab[268][180]){
         return tab[x][y].value;
     }
     else{
-        return tab[x][y].value = 74;
+        return tab[x][y].value = 77;
     }
 
 }
@@ -137,7 +132,7 @@ void Grid::idw(Cell tab[268][180]){
     cout<<"algorytm idw"<<endl;
     for(int i=0;i<268;i++){
         for(int j=0;j<180;j++){
-            cout<<"tab["<<i<<"]"<<"["<<j<<"]"<<tab[i][j].points.size()<<endl;
+            cout<<"tab["<<i<<"]"<<"["<<j<<"] = "<<tab[i][j].points.size()<<endl;
             double result = 0;
             double result1 = 0;
             double result2 = 0;
@@ -154,7 +149,6 @@ void Grid::idw(Cell tab[268][180]){
 
                 result = result1 / result2;
                 if(temp != 0){
-
                     tab[i][j].value = temp;
                     cout << "tab[" << i << "]" << "[" << j << "] temp = " << temp << endl;
                 }else {
