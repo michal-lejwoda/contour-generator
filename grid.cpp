@@ -162,3 +162,6 @@ void Grid::idw(Cell tab[268][180]){
     }
 
 }
+void get_center_of_every_cell(Cell tab[268][180],LineCell arr[134][90]){
+    printf("get_center_of_every_cell");
+}

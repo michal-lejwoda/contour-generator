@@ -29,12 +29,9 @@ int main() {
     cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/0.4457665585324316337)<<endl;
     cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/cellsize)<<endl;
     cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/cellsize)<<endl;
-//    cout<<"diff x"<<minx/cellsize<<endl;
-//    cout<<"diff y"<<miny/cellsize<<endl;
 
     Cell tab[268][180];
-//    Cell tab1[301][201];
-    // Generowanie Rastra
+    LineCell arr[134][90];
     clock_t start = clock();
     Grid grid;
     grid.generateGrid(header,reader, tab);
