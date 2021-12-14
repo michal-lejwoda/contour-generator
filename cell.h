@@ -6,6 +6,16 @@
 //#include <vector>
 
 using namespace std;
+
+
+struct Point{
+    double x;
+    double y;
+};
+struct Line{
+    Point point1;
+    Point point2;
+};
 struct Cell {
     double centerx;
     double centery;
@@ -19,6 +29,11 @@ struct LineCell {
     double topright;
     double bottomleft;
     double bottomright;
+    Point pointa;
+    Point pointb;
+    Point pointc;
+    Point pointd;
 };
+
 
 #endif //MASTER_CELL_H

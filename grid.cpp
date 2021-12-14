@@ -1,4 +1,5 @@
 #include<iostream>
+#include <cmath>
 #include "grid.h"
 #include "cell.h"
 using namespace std;
@@ -128,6 +129,68 @@ double Grid::neighbours(int x,int y,Cell tab[268][180]){
     }
 
 }
+
+void line(Point point1,Point point2){
+    printf("generowanie lini");
+    printf("punkt 1 X = %f Y = %f ",point1.x,point1.y);
+    printf("punkt 2 X = %f Y = %f \n",point2.x,point2.y);
+}
+
+void generateLines(int state,Point a,Point b,Point c,Point d){
+    printf("Line generator");
+    switch(state)
+    {
+        case 1:
+            line(c,d);
+            break;
+        case 2:
+            line(b,c);
+            break;
+        case 3:
+            line(b,d);
+            break;
+        case 4:
+            line(a,b);
+            break;
+        case 5:
+            line(a,d);
+            line(b,c);
+            break;
+        case 6:
+            line(a,c);
+            break;
+        case 7:
+            line(a,d);
+            break;
+        case 8:
+            line(a,d);
+            break;
+        case 9:
+            line(a,c);
+            break;
+
+        case 10:
+            line(a,b);
+            line(c,d);
+            break;
+        case 11:
+            line(a,b);
+            break;
+        case 12:
+            line(b,d);
+            break;
+
+        case 13:
+            line(b,c);
+            break;
+
+        case 14:
+            line(c,d);
+            break;
+    }
+}
+
+
 void Grid::idw(Cell tab[268][180]){
     cout<<"algorytm idw"<<endl;
     for(int i=0;i<268;i++){
@@ -162,6 +225,59 @@ void Grid::idw(Cell tab[268][180]){
     }
 
 }
-void get_center_of_every_cell(Cell tab[268][180],LineCell arr[134][90]){
-    printf("get_center_of_every_cell");
+int findMin(int a,int b,int c,int d){
+    return min(a,min(b,min(c,d)));
 }
+int getState(int a,int b, int c, int d){
+    return a*8+b*4+c*2+d*1;
+}
+void checkValues(LineCell cell){
+    double linediff = 0.5;
+    double topl = floor(cell.topleft/linediff);
+    double topr = floor(cell.topright/linediff);
+    double botl = floor(cell.bottomleft/linediff);
+    double botr = floor(cell.bottomright/linediff);
+    if(topl == topr && topr == botl && botl == botr){
+        ;
+    }else{
+        int minvalue = findMin(topl,topr,botl,botr);
+        int a = ceil(topl/minvalue)-1;
+        int b = ceil(topr/minvalue)-1;
+        int c = ceil(botl/minvalue)-1;
+        int d = ceil(botr/minvalue)-1;
+        int result = getState(a,b,c,d);
+        generateLines(result,cell.pointa,cell.pointb,cell.pointc,cell.pointd);
+        cout<<"test"<<endl;
+
+    }
+}
+
+void Grid::get_center_of_every_cell(liblas::Header header,Cell tab[268][180],LineCell arr[134][90]){
+    //134 90
+    double cellsize= 0.5;
+    double bigcellsize = cellsize *2;
+    int minx = (header.GetMaxX() - header.GetMinX())/cellsize;
+    int miny = (header.GetMaxY() - header.GetMinY())/cellsize;
+    for(int i=0;i<134;i++){
+        for(int j=0;j<90;j++){
+            arr[i][j].topleft=tab[i*2][j*2].value;
+            arr[i][j].topright=tab[i*2+1][j*2].value;
+            arr[i][j].bottomleft=tab[i*2][j*2+1].value;
+            arr[i][j].bottomright=tab[i*2+1][j*2+1].value;
+            arr[i][j].pointa.x = header.GetMinX() + (i*(bigcellsize)) + (cellsize);
+            arr[i][j].pointa.y = header.GetMaxY() - (j*(bigcellsize));
+            arr[i][j].pointb.x = header.GetMinX() + (i*(bigcellsize)) + (cellsize*2);
+            arr[i][j].pointb.y = header.GetMaxY() - ((j*(bigcellsize))+ (cellsize));
+            arr[i][j].pointc.x = header.GetMinX() + (i*(bigcellsize)) + (cellsize);
+            arr[i][j].pointc.y = header.GetMaxY() - ((j*(bigcellsize))+ (cellsize*2));
+            arr[i][j].pointd.x = header.GetMinX() + (i*(bigcellsize));
+            arr[i][j].pointd.y = header.GetMaxY() - ((j*(bigcellsize))+ (cellsize));
+            checkValues(arr[i][j]);
+
+        }
+    }
+}
+
+
+
+

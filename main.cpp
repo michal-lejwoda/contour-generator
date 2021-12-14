@@ -31,52 +31,57 @@ int main() {
     cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/cellsize)<<endl;
 
     Cell tab[268][180];
-    LineCell arr[134][90];
+    LineCell array[134][90];
     clock_t start = clock();
     Grid grid;
     grid.generateGrid(header,reader, tab);
     grid.distance_beetween_points(header,reader,tab);
     grid.idw(tab);
+    grid.get_center_of_every_cell(header,tab,array);
+//    grid.generateLines(array);
     clock_t end = clock();
     double elapsed = double(end - start)/CLOCKS_PER_SEC;
     printf("Time measured: %.3f seconds.\n", elapsed);
 
-    GDALDataset  *poDataset,*pNewDS;
-    GDALDriver *pDriverTiff;
-    char const * pszFilename = "/home/saxatachi/Desktop/inter_raster.tif";
-    char const * output = "/home/saxatachi/Desktop/neww.tif";
-//    GDALAllRegister();
-    poDataset = (GDALDataset *) GDALOpen( pszFilename, GA_ReadOnly );
-    if( poDataset == NULL )
-    {
-        cout<<"null"<<endl;
-    }else{
 
-        int nRows, nCols;
-        int rows = 268;
-        int columns = 180;
-        double noData;
-        double transform[6];
-        nCols = poDataset->GetRasterBand(1)->GetXSize();
-        nRows = poDataset->GetRasterBand(1)->GetYSize();
-        noData = poDataset->GetRasterBand(1)->GetNoDataValue();
-        cout<<"nCols "<<nCols<<endl;
-        cout<<"nRows "<<nRows<<endl;
-        poDataset->GetGeoTransform(transform);
-        transform[1] = 0.5;
-        transform[5] = 0.5;
-        for(int i=0;i<6;i++){
-            cout<<"element"<<transform[i]<<endl;
-        }
-        pDriverTiff = GetGDALDriverManager()->GetDriverByName("GTiff");
-        pNewDS = pDriverTiff->Create(output,rows,columns,1,GDT_Float32,NULL);
-        pNewDS->SetGeoTransform(transform);
-        float *oldRow = (float*) CPLMalloc(sizeof(float)*nCols);
-        float *newRow = (float*) CPLMalloc(sizeof(float)*nCols);
-        cout<<"alokowanie"<<endl;
-        float *newwRow = (float*) CPLMalloc(sizeof(float)*columns);
+//tworzenie rastra
+//    GDALDataset  *poDataset,*pNewDS;
+//    GDALDriver *pDriverTiff;
+//    char const * pszFilename = "/home/saxatachi/Desktop/inter_raster.tif";
+//    char const * output = "/home/saxatachi/Desktop/neww.tif";
+////    GDALAllRegister();
+//    poDataset = (GDALDataset *) GDALOpen( pszFilename, GA_ReadOnly );
+//    if( poDataset == NULL )
+//    {
+//        cout<<"null"<<endl;
+//    }else{
+//
+//        int nRows, nCols;
+//        int rows = 268;
+//        int columns = 180;
+//        double noData;
+//        double transform[6];
+//        nCols = poDataset->GetRasterBand(1)->GetXSize();
+//        nRows = poDataset->GetRasterBand(1)->GetYSize();
+//        noData = poDataset->GetRasterBand(1)->GetNoDataValue();
+//        cout<<"nCols "<<nCols<<endl;
+//        cout<<"nRows "<<nRows<<endl;
+//        poDataset->GetGeoTransform(transform);
+//        transform[1] = 0.5;
+//        transform[5] = 0.5;
+//        for(int i=0;i<6;i++){
+//            cout<<"element"<<transform[i]<<endl;
+//        }
+//        pDriverTiff = GetGDALDriverManager()->GetDriverByName("GTiff");
+//        pNewDS = pDriverTiff->Create(output,rows,columns,1,GDT_Float32,NULL);
+//        pNewDS->SetGeoTransform(transform);
+//        float *oldRow = (float*) CPLMalloc(sizeof(float)*nCols);
+//        float *newRow = (float*) CPLMalloc(sizeof(float)*nCols);
+//        cout<<"alokowanie"<<endl;
+//        float *newwRow = (float*) CPLMalloc(sizeof(float)*columns);
 
 
+//test
 //        for(int i=0;i<nRows;i++){
 //            poDataset->GetRasterBand(1)->RasterIO(GF_Read,0,i,nCols,1,oldRow,nCols,1,GDT_Float32,0,0);
 //            for(int j=0;j<nCols;j++){
@@ -89,38 +94,20 @@ int main() {
 //            }
 //            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,nCols,1,newRow,nCols,1,GDT_Float32,0,0);
 //        }
-        for(int i=0;i<rows;i++){
-            for(int j=0;j<columns;j++){
-                newwRow[j] = tab[i][j].value;
-            }
-            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,rows,1,newwRow,columns,1,GDT_Float32,0,0);
-        }
 
-        GDALClose(poDataset);
-        GDALClose(pNewDS);
-        GDALDestroyDriverManager();
-    }
+// Uzupełnianie komórek rastra
+//        for(int i=0;i<rows;i++){
+//            for(int j=0;j<columns;j++){
+//                newwRow[j] = tab[i][j].value;
+//            }
+//            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,rows,1,newwRow,columns,1,GDT_Float32,0,0);
+//        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//Zamkniecie rastra
+//        GDALClose(poDataset);
+//        GDALClose(pNewDS);
+//        GDALDestroyDriverManager();
+//    }
 
 
     //    GDALDataset  *poDataset;
@@ -163,7 +150,7 @@ int main() {
 //
 //    poDstDS = poDriver->Create( z, 512, 512, 1, GDT_Byte,NULL);
 //    GDALClose(poDstDS);
-    ifs.close();
+//    ifs.close();
     return 0;
 
 }
