@@ -10,38 +10,49 @@
 #include "grid.h"
 #include "cell.h"
 #include "gdal/cpl_string.h"
+double cellsize = 0.5;
+int minx;
+int miny;
+int halfminx;
+int halfminy;
+
 int main() {
     GDALAllRegister();
-    float cellsize = 0.5;
+    cout.precision(15);
     std::ifstream ifs;
 //    ifs.open("/home/saxatachi/las_data/points.las", std::ios::in | std::ios::binary);
     ifs.open("/home/saxatachi/las_data/punkty_z_domami.las", std::ios::in | std::ios::binary);
-
     liblas::ReaderFactory f;
     liblas::Reader reader = f.CreateWithStream(ifs);
     liblas::Header const& header = reader.GetHeader();
-    cout<<"lidar x"<<header.GetExtent().minx()<<" "<<header.GetExtent().maxx()<<endl;
-    int minx = (header.GetMaxX() - header.GetMinX())/cellsize;
-    int miny = (header.GetMaxY() - header.GetMinY())/cellsize;
+    minx = ceil((header.GetMaxX() - header.GetMinX())/cellsize);
+    miny = ceil((header.GetMaxY() - header.GetMinY())/cellsize);
+    halfminx = minx/2;
+    halfminy = miny/2;
+//    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/0.4457665585349638859)<<endl;
+//    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/0.4457665585324316337)<<endl;
+//    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/cellsize)<<endl;
+//    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/cellsize)<<endl;
+    vector<vector<Cell>> tab( minx , vector<Cell> (miny));
+    cout<<"halfminx = "<<halfminx<<" halfminy = "<<halfminy<<endl;
+    vector<vector<LineCell>> biggertab(halfminx, vector<LineCell>(halfminy));
+//    LineCell array[halfminx][halfminy];
+//    Cell tab[minx][miny];
+//    cout<<"minx = "<<minx<<"miny = "<<miny<<endl;
+//    cout<<"vecsize"<<vec[1].size()<<endl;
+//    Cell tab[268][180];
+//    LineCell array[134][90];
+//    clock_t start = clock();
 
-    cout.precision(15);
-    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/0.4457665585349638859)<<endl;
-    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/0.4457665585324316337)<<endl;
-    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/cellsize)<<endl;
-    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/cellsize)<<endl;
-
-    Cell tab[268][180];
-    LineCell array[134][90];
-    clock_t start = clock();
     Grid grid;
     grid.generateGrid(header,reader, tab);
     grid.distance_beetween_points(header,reader,tab);
-    grid.idw(tab);
-    grid.get_center_of_every_cell(header,tab,array);
+//    grid.idw(tab);
+//    grid.get_center_of_every_cell(header,tab,array);
 //    grid.generateLines(array);
-    clock_t end = clock();
-    double elapsed = double(end - start)/CLOCKS_PER_SEC;
-    printf("Time measured: %.3f seconds.\n", elapsed);
+//    clock_t end = clock();
+//    double elapsed = double(end - start)/CLOCKS_PER_SEC;
+//    printf("Time measured: %.3f seconds.\n", elapsed);
 
 
 //tworzenie rastra

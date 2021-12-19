@@ -8,6 +8,12 @@
 using namespace std;
 
 
+struct PointsDistance{
+    liblas::Point point;
+    double distance;
+    PointsDistance(const liblas::Point& point_,double distance_):point(point_), distance(distance_){}
+};
+
 struct Point{
     double x;
     double y;
@@ -19,8 +25,9 @@ struct Line{
 struct Cell {
     double centerx;
     double centery;
-    vector<liblas::Point> points;
-    vector<double> distance;
+    vector<PointsDistance> pointsdistance;
+//    vector<liblas::Point> points;
+//    vector<double> distance;
     double value;
 };
 
