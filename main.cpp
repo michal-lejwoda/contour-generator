@@ -46,7 +46,7 @@ int main() {
 
     Grid grid;
     grid.generateGrid(header,reader, tab);
-    grid.distance_beetween_points(header,reader,tab);
+//    grid.distance_beetween_points(header,reader,tab);
 //    grid.idw(tab);
 //    grid.get_center_of_every_cell(header,tab,array);
 //    grid.generateLines(array);
