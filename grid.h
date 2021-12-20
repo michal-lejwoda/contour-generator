@@ -8,13 +8,13 @@
 using namespace std;
 class Grid{
 public:
-    void generateGrid(liblas::Header,liblas::Reader,std::vector<std::vector<Cell>>);
-    void distance_beetween_points(liblas::Header,liblas::Reader,std::vector<std::vector<Cell>>);
-    void idw(std::vector<std::vector<Cell>>);
+    void generateGrid(liblas::Header,liblas::Reader);
+    void distance_beetween_points(liblas::Header,liblas::Reader);
+    void idw();
 //    void generateLines(int result,Point a,Point b,Point c,Point d);
-    void get_center_of_every_cell(liblas::Header,std::vector<std::vector<Cell>>,std::vector<std::vector<LineCell>>);
-    double neighbours(int x, int y,std::vector<std::vector<Cell>>);
-    void checkneighbours(int x,int y,std::vector<std::vector<Cell>>,liblas::Point);
+    void get_center_of_every_cell(liblas::Header);
+    double neighbours(int x, int y);
+    void checkneighbours(int x,int y,liblas::Point);
 
 };
 #endif

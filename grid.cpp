@@ -10,47 +10,36 @@ extern int miny;
 extern int halfminx;
 extern int halfminy;
 double R;
+extern std::vector<std::vector<Cell>> tab;
+extern std::vector<std::vector<LineCell>> arr;
+extern std::vector<Line> array_with_lines;
 
-void Grid::generateGrid(liblas::Header header, liblas::Reader reader, std::vector<std::vector<Cell>> tab) {
+//void checkvalues(){
+//    for (int i = 0; i < minx; i++) {
+//        for (int j = 0; j < miny; j++) {
+//            cout<<"tab["<<i<<"]["<<j<<"] = "<<tab[i][j].value<<endl;
+//        }
+//    }
+//}
+
+
+void Grid::generateGrid(liblas::Header header, liblas::Reader reader) {
     for (int i = 0; i < minx; i++) {
         for (int j = 0; j < miny; j++) {
             tab[i][j].centerx = header.GetMinX() + (i * (cellsize)) + (cellsize / 2);
             tab[i][j].centery = header.GetMaxY() - ((j * (cellsize)) + (cellsize / 2));
         }
     }
-    distance_beetween_points(header, reader, tab);
+    distance_beetween_points(header, reader);
+    idw();
+    get_center_of_every_cell(header);
 }
 
-void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader, std::vector<std::vector<Cell>> tab) {
-//    cout<<"tab112 ="<<tab[112][0].centerx<<endl;
-//    cout.precision(15);
-//    double cellsize = 0.5;
+void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader) {
     R = (cellsize * sqrt(2)) / 2;
-//    reader.ReadPointAt(1002);
-//    liblas::Point const& r = reader.GetPoint();
-//    int x = floor((r.GetX() - header.GetMinX())/cellsize);
-//    int y = floor((header.GetMaxY() - r.GetY())/cellsize);
-//    double result = sqrt(pow((tab[x][y].centerx)-r.GetX(),2)+pow((tab[x][y].centery)-r.GetY(),2));
-//    cout<<tab[x][y].centerx - r.GetX()<<endl;
-//    cout<<tab[x][y].centery - r.GetY()<<endl;
-//    if(result>R){
-//
-//        for(int el=1;el<=ceil(1/cellsize);el++){
-//            for(int el2=1;el2<=ceil(1/cellsize);el2++){
-//                float result2 = sqrt(pow((tab[x+el][y+el2].centerx)-r.GetX(),2)+pow((tab[x+el][y+el2].centery)-r.GetY(),2));
-//                if(result2<=R){
-//                    cout<<"wynik w poprawnym for"<<result2<<"tab["<<x+el<<"]["<<y+el2<<"]"<<endl;
-//                    break;
-//                }
-//            }
-//        }
-//    }else{
-//        cout<<"wynik w pierwszym"<<result<<"tab["<<x<<"]["<<y<<"]"<<endl;
-//    }
-
-
     liblas::Point const &p = reader.GetPoint();
     int count = 0;
+
     while (reader.ReadNextPoint()) {
 
 //        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
@@ -65,41 +54,12 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
         }
         int x = floor((p.GetX() - header.GetMinX()) / cellsize);
         int y = floor((header.GetMaxY() - p.GetY()) / cellsize);
-        double result = sqrt(pow((tab[x][y].centerx) - p.GetX(), 2) + pow((tab[x][y].centery) - p.GetY(), 2));
-        count++;
-        cout<<"pętla"<<count<<endl;
-        checkneighbours(x, y, tab, p);
-
-//        if (result > R) {
-//            cout << "R =" << R << endl;
-//            cout << " blad w tab[" << x << "][" << y << "]" << endl;
-//        }
-//        if (result > R) {
-//            cout<<x<<" oraz "<<y<<endl;
-//            for (int el = 1; el <= ceil(1 / cellsize); el++) {
-//                for (int el2 = 1; el2 <= ceil(1 / cellsize); el2++) {
-//                    if(x+el>268 or y+el2>180){
-//                        continue;
-//                    }
-//                    float result2 = sqrt(pow((tab[x + el][y + el2].centerx) - p.GetX(), 2) +
-//                                         pow((tab[x + el][y + el2].centery) - p.GetY(), 2));
-//                    if (result2 <= R) {
-//                        cout<<x + el<<" oraz "<<y + el2<<endl;
-//                        tab[x + el][y + el2].points.push_back(p);
-//                        tab[x + el][y + el2].distance.push_back(result2);
-//                        break;
-//                    }
-//                }
-//            }
-//        } else {
-//        PointsDistance temp_distance(p, result);
-//        tab[x][y].pointsdistance.push_back(temp_distance);
-//            tab[x][y].pointsdistance.point.push_back(p);
-//            tab[x][y].pointsdistance.distance.push_back(result);
+//        double result = sqrt(pow((tab[x][y].centerx) - p.GetX(), 2) + pow((tab[x][y].centery) - p.GetY(), 2));
+        checkneighbours(x, y, p);
     }
 }
 
-void Grid::checkneighbours(int x, int y, std::vector<std::vector<Cell>> tab, liblas::Point p) {
+void Grid::checkneighbours(int x, int y, liblas::Point p) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             if (x - i > 0 && x - i < minx && y - j > 0 && y - j < miny) {
@@ -115,52 +75,29 @@ void Grid::checkneighbours(int x, int y, std::vector<std::vector<Cell>> tab, lib
     }
 }
 
-double Grid::neighbours(int x, int y, std::vector<std::vector<Cell>> tab) {
-    if (tab[x - 1][y - 1].pointsdistance.size() > 0) {
-        tab[x][y].value = tab[x - 1][y - 1].pointsdistance[0].point.GetZ();
-        return tab[x][y].value;
+double Grid::neighbours(int x, int y) {
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (x - i > 0 && x - i < minx && y - j > 0 && y - j < miny) {
+                if (tab[x - i][y - j].pointsdistance.size() > 0) {
+                    tab[x][y].value = tab[x - i][y - j].pointsdistance[0].point.GetZ();
+                    return tab[x][y].value;
+                }
+            }
+        }
     }
-    if (tab[x][y - 1].pointsdistance.size() > 0) {
-        tab[x][y].value = tab[x][y - 1].pointsdistance[0].point.GetZ();
-        return tab[x][y].value;
-    }
-    if (tab[x + 1][y - 1].pointsdistance.size() > 0) {
-        tab[x][y].value = tab[x + 1][y - 1].pointsdistance[0].point.GetZ();
-        return tab[x][y].value;
-    }
-    if (tab[x - 1][y].pointsdistance.size() > 0) {
-        tab[x][y].value = tab[x - 1][y].pointsdistance[0].point.GetZ();
-        return tab[x][y].value;
-    }
-    if (tab[x + 1][y].pointsdistance.size() > 0) {
-        tab[x][y].value = tab[x + 1][y].pointsdistance[0].point.GetZ();
-        return tab[x][y].value;
-    }
-    if (tab[x - 1][y + 1].pointsdistance.size() > 0) {
-        tab[x][y].value = tab[x - 1][y + 1].pointsdistance[0].point.GetZ();
-        return tab[x][y].value;
-    }
-    if (tab[x][y + 1].pointsdistance.size() > 0) {
-        tab[x][y].value = tab[x][y + 1].pointsdistance[0].point.GetZ();
-        return tab[x][y].value;
-    }
-    if (tab[x + 1][y + 1].pointsdistance.size() > 0) {
-        tab[x][y].value = tab[x + 1][y + 1].pointsdistance[0].point.GetZ();
-        return tab[x][y].value;
-    } else {
-        return tab[x][y].value = 77;
-    }
-
+    return tab[x][y].value = 77;
 }
 
 void line(Point point1, Point point2) {
-    printf("generowanie lini");
-    printf("punkt 1 X = %f Y = %f ", point1.x, point1.y);
-    printf("punkt 2 X = %f Y = %f \n", point2.x, point2.y);
+    Line temp_line = Line(point1, point2);
+    array_with_lines.push_back(temp_line);
+//    printf("generowanie lini");
+//    printf("punkt 1 X = %f Y = %f ", point1.x, point1.y);
+//    printf("punkt 2 X = %f Y = %f \n", point2.x, point2.y);
 }
 
 void generateLines(int state, Point a, Point b, Point c, Point d) {
-    printf("Line generator");
     switch (state) {
         case 1:
             line(c, d);
@@ -213,8 +150,7 @@ void generateLines(int state, Point a, Point b, Point c, Point d) {
 }
 
 
-void Grid::idw(std::vector<std::vector<Cell>> tab) {
-    cout << "algorytm idw" << endl;
+void Grid::idw() {
     for (int i = 0; i < minx; i++) {
         for (int j = 0; j < miny; j++) {
             double result = 0;
@@ -224,21 +160,24 @@ void Grid::idw(std::vector<std::vector<Cell>> tab) {
             int size = tab[i][j].pointsdistance.size();
             if (size > 0) {
                 for (int k = 0; k < size; k++) {
+
                     result1 =
                             result1 + (tab[i][j].pointsdistance[k].point.GetZ() / tab[i][j].pointsdistance[k].distance);
                     result2 = result2 + (1 / tab[i][j].pointsdistance[k].distance);
+
                     if (tab[i][j].pointsdistance[k].distance == 0) {
                         temp = tab[i][j].pointsdistance[k].point.GetZ();
                     }
                 }
                 result = result1 / result2;
+
                 if (temp != 0) {
                     tab[i][j].value = temp;
                 } else {
                     tab[i][j].value = result;
                 }
             } else {
-                neighbours(i, j, tab);
+                neighbours(i, j);
             }
         }
     }
@@ -271,10 +210,7 @@ void checkValues(LineCell cell) {
     }
 }
 
-void Grid::get_center_of_every_cell(liblas::Header header, std::vector<std::vector<Cell>> tab,
-                                    std::vector<std::vector<LineCell>> arr) {
-    //134 90
-//    double cellsize= 0.5;
+void Grid::get_center_of_every_cell(liblas::Header header) {
     double bigcellsize = cellsize * 2;
     for (int i = 0; i < halfminx; i++) {
         for (int j = 0; j < halfminy; j++) {

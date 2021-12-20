@@ -15,7 +15,9 @@ int minx;
 int miny;
 int halfminx;
 int halfminy;
-
+std::vector<std::vector<Cell>> tab;
+std::vector<std::vector<LineCell>> arr;
+std::vector<Line> array_with_lines;
 int main() {
     GDALAllRegister();
     cout.precision(15);
@@ -29,30 +31,19 @@ int main() {
     miny = ceil((header.GetMaxY() - header.GetMinY())/cellsize);
     halfminx = minx/2;
     halfminy = miny/2;
-//    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/0.4457665585349638859)<<endl;
-//    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/0.4457665585324316337)<<endl;
-//    cout<<"Róznica x "<<round((header.GetMaxX() - header.GetMinX())/cellsize)<<endl;
-//    cout<<"Róznica y "<<round((header.GetMaxY() - header.GetMinY())/cellsize)<<endl;
-    vector<vector<Cell>> tab( minx , vector<Cell> (miny));
-    cout<<"halfminx = "<<halfminx<<" halfminy = "<<halfminy<<endl;
-    vector<vector<LineCell>> biggertab(halfminx, vector<LineCell>(halfminy));
-//    LineCell array[halfminx][halfminy];
-//    Cell tab[minx][miny];
-//    cout<<"minx = "<<minx<<"miny = "<<miny<<endl;
-//    cout<<"vecsize"<<vec[1].size()<<endl;
-//    Cell tab[268][180];
-//    LineCell array[134][90];
-//    clock_t start = clock();
+    tab = vector<vector<Cell>>( minx , vector<Cell> (miny));
+    arr = vector<vector<LineCell>> (halfminx, vector<LineCell>(halfminy));
 
+    clock_t start = clock();
     Grid grid;
-    grid.generateGrid(header,reader, tab);
+    grid.generateGrid(header,reader);
 //    grid.distance_beetween_points(header,reader,tab);
 //    grid.idw(tab);
 //    grid.get_center_of_every_cell(header,tab,array);
 //    grid.generateLines(array);
-//    clock_t end = clock();
-//    double elapsed = double(end - start)/CLOCKS_PER_SEC;
-//    printf("Time measured: %.3f seconds.\n", elapsed);
+    clock_t end = clock();
+    double elapsed = double(end - start)/CLOCKS_PER_SEC;
+    printf("Time measured: %.3f seconds.\n", elapsed);
 
 
 //tworzenie rastra
@@ -92,7 +83,6 @@ int main() {
 //        float *newwRow = (float*) CPLMalloc(sizeof(float)*columns);
 
 
-//test
 //        for(int i=0;i<nRows;i++){
 //            poDataset->GetRasterBand(1)->RasterIO(GF_Read,0,i,nCols,1,oldRow,nCols,1,GDT_Float32,0,0);
 //            for(int j=0;j<nCols;j++){
