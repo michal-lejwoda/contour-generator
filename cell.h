@@ -7,6 +7,15 @@
 
 using namespace std;
 
+struct Point{
+    double x;
+    double y;
+};
+
+struct StructurePoint{
+    Point point;
+    double value;
+};
 
 struct PointsDistance{
     liblas::Point point;
@@ -14,10 +23,7 @@ struct PointsDistance{
     PointsDistance(const liblas::Point& point_,double distance_):point(point_), distance(distance_){}
 };
 
-struct Point{
-    double x;
-    double y;
-};
+
 struct Line{
     Point point1;
     Point point2;

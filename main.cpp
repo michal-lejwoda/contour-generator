@@ -18,6 +18,7 @@ int halfminy;
 std::vector<std::vector<Cell>> tab;
 std::vector<std::vector<LineCell>> arr;
 std::vector<Line> array_with_lines;
+double isoline_value = 0.5;
 int main() {
     GDALAllRegister();
     cout.precision(15);
@@ -46,7 +47,14 @@ int main() {
     printf("Time measured: %.3f seconds.\n", elapsed);
 
 
-//tworzenie rastra
+
+
+
+
+
+
+
+    //tworzenie rastra
 //    GDALDataset  *poDataset,*pNewDS;
 //    GDALDriver *pDriverTiff;
 //    char const * pszFilename = "/home/saxatachi/Desktop/inter_raster.tif";

@@ -13,6 +13,7 @@ double R;
 extern std::vector<std::vector<Cell>> tab;
 extern std::vector<std::vector<LineCell>> arr;
 extern std::vector<Line> array_with_lines;
+extern double isoline_value;
 
 //void checkvalues(){
 //    for (int i = 0; i < minx; i++) {
@@ -32,14 +33,13 @@ void Grid::generateGrid(liblas::Header header, liblas::Reader reader) {
     }
     distance_beetween_points(header, reader);
     idw();
-    get_center_of_every_cell(header);
+    get_data_of_every_cell(header);
 }
 
 void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader) {
     R = (cellsize * sqrt(2)) / 2;
     liblas::Point const &p = reader.GetPoint();
     int count = 0;
-
     while (reader.ReadNextPoint()) {
 
 //        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
@@ -54,7 +54,6 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
         }
         int x = floor((p.GetX() - header.GetMinX()) / cellsize);
         int y = floor((header.GetMaxY() - p.GetY()) / cellsize);
-//        double result = sqrt(pow((tab[x][y].centerx) - p.GetX(), 2) + pow((tab[x][y].centery) - p.GetY(), 2));
         checkneighbours(x, y, p);
     }
 }
@@ -75,6 +74,7 @@ void Grid::checkneighbours(int x, int y, liblas::Point p) {
     }
 }
 
+
 double Grid::neighbours(int x, int y) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
@@ -92,10 +92,12 @@ double Grid::neighbours(int x, int y) {
 void line(Point point1, Point point2) {
     Line temp_line = Line(point1, point2);
     array_with_lines.push_back(temp_line);
-//    printf("generowanie lini");
-//    printf("punkt 1 X = %f Y = %f ", point1.x, point1.y);
-//    printf("punkt 2 X = %f Y = %f \n", point2.x, point2.y);
 }
+void ceil_line(Point point1, Point point2){
+
+}
+
+void cell_floor(Point point1, Point point2){}
 
 void generateLines(int state, Point a, Point b, Point c, Point d) {
     switch (state) {
@@ -160,7 +162,6 @@ void Grid::idw() {
             int size = tab[i][j].pointsdistance.size();
             if (size > 0) {
                 for (int k = 0; k < size; k++) {
-
                     result1 =
                             result1 + (tab[i][j].pointsdistance[k].point.GetZ() / tab[i][j].pointsdistance[k].distance);
                     result2 = result2 + (1 / tab[i][j].pointsdistance[k].distance);
@@ -193,13 +194,13 @@ int getState(int a, int b, int c, int d) {
 }
 
 void checkValues(LineCell cell) {
-    double linediff = 0.5;
-    double topl = floor(cell.topleft / linediff);
-    double topr = floor(cell.topright / linediff);
-    double botl = floor(cell.bottomleft / linediff);
-    double botr = floor(cell.bottomright / linediff);
+    double topl = floor(cell.topleft / isoline_value);
+    double topr = floor(cell.topright / isoline_value);
+    double botl = floor(cell.bottomleft / isoline_value);
+    double botr = floor(cell.bottomright / isoline_value);
     if (topl == topr && topr == botl && botl == botr) { ;
     } else {
+        cout<<cell.topleft<<" "<<cell.topright<<" "<<cell.bottomleft<<" "<<cell.bottomright<<endl;
         int minvalue = findMin(topl, topr, botl, botr);
         int a = ceil(topl / minvalue) - 1;
         int b = ceil(topr / minvalue) - 1;
@@ -210,7 +211,7 @@ void checkValues(LineCell cell) {
     }
 }
 
-void Grid::get_center_of_every_cell(liblas::Header header) {
+void Grid::get_data_of_every_cell(liblas::Header header) {
     double bigcellsize = cellsize * 2;
     for (int i = 0; i < halfminx; i++) {
         for (int j = 0; j < halfminy; j++) {
@@ -230,3 +231,48 @@ void Grid::get_center_of_every_cell(liblas::Header header) {
         }
     }
 }
+
+//void Grid::single_cell_idw(){
+//    double result = 0;
+//    double result1 = 0;
+//    double result2 = 0;
+//    double temp = 0;
+//    int size = tab[i][j].pointsdistance.size();
+//    if (size > 0) {
+//        for (int k = 0; k < size; k++) {
+//
+//            result1 =
+//                    result1 + (tab[i][j].pointsdistance[k].point.GetZ() / tab[i][j].pointsdistance[k].distance);
+//            result2 = result2 + (1 / tab[i][j].pointsdistance[k].distance);
+//
+//            if (tab[i][j].pointsdistance[k].distance == 0) {
+//                temp = tab[i][j].pointsdistance[k].point.GetZ();
+//            }
+//        }
+//        result = result1 / result2;
+//
+//        if (temp != 0) {
+//            tab[i][j].value = temp;
+//        } else {
+//            tab[i][j].value = result;
+//        }
+//    }
+//}
+
+//double Grid::neighboursv2(int x, int y){
+//    int i =0;
+//    vector <double> temp_array;
+//    while(i){
+//        if(temp_array.size()>0){
+//
+//            break;
+//        }
+//        for(int j = -i; j<= i;j++){
+//            for(int k = -i; k<=i;k++){
+//                if (tab[x - j][y - k].pointsdistance.size() > 0){
+//                    temp_array.push_back(tab[x - j][y - k].value);
+//                }
+//            }
+//        }
+//    }
+//}
