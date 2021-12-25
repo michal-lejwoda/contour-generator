@@ -91,16 +91,19 @@ double Grid::neighbours(int x, int y) {
 
 void line(Point point1, Point point2, double firstpoint,double secondpoint) {
     if(floor(firstpoint/isoline_value) == ceil(secondpoint/isoline_value)){
-        cout<<"Pierwsza petla = "<<(floor(firstpoint/isoline_value)*isoline_value)<<endl;
+//        cout<<"Pierwsza petla = "<<(floor(firstpoint/isoline_value)*isoline_value)<<endl;
         Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value));
         array_with_lines.push_back(temp_line);
     }else if(floor(secondpoint/isoline_value) == ceil(firstpoint/isoline_value)){
-        cout<<"Druga petla = "<<(floor(secondpoint/isoline_value)*2)<<endl;
+//        cout<<"Druga petla = "<<(floor(secondpoint/isoline_value)*2)<<endl;
         Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value));
         array_with_lines.push_back(temp_line);
     }else{
         //Za duża róznica
-//        cout<<"za duża różnica "<<firstpoint<<" "<<secondpoint<<endl;
+        cout<<"za duża różnica "<<firstpoint<<" "<<secondpoint<<endl;
+        cout<<"Pierwsza petla = "<<(floor(firstpoint/isoline_value)*isoline_value)<<endl;
+        cout<<"Druga petla = "<<(floor(secondpoint/isoline_value)*isoline_value)<<endl;
+
     ;
     }
 }
@@ -120,8 +123,9 @@ void generateLines(int state, LineCell cell) {
             line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft);
             break;
         case 5:
-            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright);
-            line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft);
+            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft);
+            line(cell.pointb, cell.pointc,cell.bottomright,cell.topright);
+//            cout<<"cell.topleft "<<cell.topleft<<" cell.bottomright "<<cell.bottomright<<" cell.topright "<<cell.topright<<" cell.bottomleft "<<cell.bottomleft<<endl;
             break;
         case 6:
             line(cell.pointa, cell.pointc,cell.topleft,cell.topright);
@@ -136,8 +140,8 @@ void generateLines(int state, LineCell cell) {
             line(cell.pointa, cell.pointc,cell.topleft,cell.bottomright);
             break;
         case 10:
-            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft);
-            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright);
+            line(cell.pointa, cell.pointb,cell.topright,cell.bottomright);
+            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topleft);
             break;
         case 11:
             line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft);
@@ -156,6 +160,62 @@ void generateLines(int state, LineCell cell) {
     }
 }
 
+void single_cell_idw(int x,int y,vector<double>temp_array){
+    double temp = 0;
+    for(int i=0;i<temp_array.size();i++){
+//        cout<<"wartosci "<<temp_array[i]<<endl;
+        temp += temp_array[i];
+    }
+    double result = temp/temp_array.size();
+//    cout<<"rezultat = "<<result<<endl;
+    tab[x][y].value = result;
+
+}
+
+double neighboursv2(int x, int y){
+    int i = 0;
+    vector <double> temp_array;
+    while(true){
+        if(temp_array.size()>0){
+//            cout<<"i = "<<i<<endl;
+//            cout<<"końcowy wynik "<<temp_array.size()<<endl;
+            single_cell_idw(x,y,temp_array);
+            break;
+        }
+        for(int j = -i; j<= i;j++){
+            for(int k = -i; k<=i;k++){
+                if (x - j > 0 && x - j < minx && y - k > 0 && y - k < miny) {
+                    if (tab[x - j][y - k].pointsdistance.size() > 0) {
+                        temp_array.push_back(tab[x - j][y - k].value);
+                    }
+                }
+            }
+        }
+        i++;
+    }
+}
+
+
+void checkeveryvalue(){
+    for (int i = 0; i < minx; i++) {
+        for (int j = 0; j < miny; j++) {
+//            cout<<"tablica "<<tab[i][j].value<<endl;
+            if(tab[i][j].value == 0){
+                neighboursv2(i,j);
+            }
+        }
+    }
+}
+void checkeveryvaluev2(){
+    for (int i = 0; i < minx; i++) {
+        for (int j = 0; j < miny; j++) {
+            cout<<"koniec"<<tab[i][j].value<<endl;
+//            if(tab[i][j].value == 0){
+//                neighboursv2(i,j);
+//            }
+        }
+    }
+}
 
 void Grid::idw() {
     for (int i = 0; i < minx; i++) {
@@ -183,10 +243,13 @@ void Grid::idw() {
                     tab[i][j].value = result;
                 }
             } else {
-                neighbours(i, j);
+//                neighbours(i, j);
+//                neighboursv2(i,j);
             }
         }
     }
+    checkeveryvalue();
+//    checkeveryvaluev2();
 
 }
 
@@ -242,47 +305,5 @@ void Grid::get_data_of_every_cell(liblas::Header header) {
     }
 }
 
-//void Grid::single_cell_idw(){
-//    double result = 0;
-//    double result1 = 0;
-//    double result2 = 0;
-//    double temp = 0;
-//    int size = tab[i][j].pointsdistance.size();
-//    if (size > 0) {
-//        for (int k = 0; k < size; k++) {
-//
-//            result1 =
-//                    result1 + (tab[i][j].pointsdistance[k].point.GetZ() / tab[i][j].pointsdistance[k].distance);
-//            result2 = result2 + (1 / tab[i][j].pointsdistance[k].distance);
-//
-//            if (tab[i][j].pointsdistance[k].distance == 0) {
-//                temp = tab[i][j].pointsdistance[k].point.GetZ();
-//            }
-//        }
-//        result = result1 / result2;
-//
-//        if (temp != 0) {
-//            tab[i][j].value = temp;
-//        } else {
-//            tab[i][j].value = result;
-//        }
-//    }
-//}
 
-//double Grid::neighboursv2(int x, int y){
-//    int i =0;
-//    vector <double> temp_array;
-//    while(i){
-//        if(temp_array.size()>0){
-//
-//            break;
-//        }
-//        for(int j = -i; j<= i;j++){
-//            for(int k = -i; k<=i;k++){
-//                if (tab[x - j][y - k].pointsdistance.size() > 0){
-//                    temp_array.push_back(tab[x - j][y - k].value);
-//                }
-//            }
-//        }
-//    }
-//}
+
