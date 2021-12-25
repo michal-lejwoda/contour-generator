@@ -27,7 +27,8 @@ struct PointsDistance{
 struct Line{
     Point point1;
     Point point2;
-    Line(Point point1_,Point point2_):point1(point1_), point2(point2_){}
+    double value;
+    Line(Point point1_,Point point2_,double value_):point1(point1_), point2(point2_), value(value_) {}
 };
 struct Cell {
     double centerx;

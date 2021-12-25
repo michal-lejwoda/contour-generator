@@ -18,7 +18,7 @@ int halfminy;
 std::vector<std::vector<Cell>> tab;
 std::vector<std::vector<LineCell>> arr;
 std::vector<Line> array_with_lines;
-double isoline_value = 0.5;
+double isoline_value = 2;
 int main() {
     GDALAllRegister();
     cout.precision(15);

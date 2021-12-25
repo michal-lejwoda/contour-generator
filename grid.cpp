@@ -89,64 +89,69 @@ double Grid::neighbours(int x, int y) {
     return tab[x][y].value = 77;
 }
 
-void line(Point point1, Point point2) {
-    Line temp_line = Line(point1, point2);
-    array_with_lines.push_back(temp_line);
+void line(Point point1, Point point2, double firstpoint,double secondpoint) {
+    if(floor(firstpoint/isoline_value) == ceil(secondpoint/isoline_value)){
+        cout<<"Pierwsza petla = "<<(floor(firstpoint/isoline_value)*isoline_value)<<endl;
+        Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value));
+        array_with_lines.push_back(temp_line);
+    }else if(floor(secondpoint/isoline_value) == ceil(firstpoint/isoline_value)){
+        cout<<"Druga petla = "<<(floor(secondpoint/isoline_value)*2)<<endl;
+        Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value));
+        array_with_lines.push_back(temp_line);
+    }else{
+        //Za duża róznica
+//        cout<<"za duża różnica "<<firstpoint<<" "<<secondpoint<<endl;
+    ;
+    }
 }
-void ceil_line(Point point1, Point point2){
 
-}
-
-void cell_floor(Point point1, Point point2){}
-
-void generateLines(int state, Point a, Point b, Point c, Point d) {
+void generateLines(int state, LineCell cell) {
     switch (state) {
         case 1:
-            line(c, d);
+            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright);
             break;
         case 2:
-            line(b, c);
+            line(cell.pointb, cell.pointc,cell.topleft,cell.bottomright);
             break;
         case 3:
-            line(b, d);
+            line(cell.pointb, cell.pointd,cell.topright,cell.bottomleft);
             break;
         case 4:
-            line(a, b);
+            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft);
             break;
         case 5:
-            line(a, d);
-            line(b, c);
+            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright);
+            line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft);
             break;
         case 6:
-            line(a, c);
+            line(cell.pointa, cell.pointc,cell.topleft,cell.topright);
             break;
         case 7:
-            line(a, d);
+            line(cell.pointa, cell.pointd,cell.topleft,cell.topright);
             break;
         case 8:
-            line(a, d);
+            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright);
             break;
         case 9:
-            line(a, c);
+            line(cell.pointa, cell.pointc,cell.topleft,cell.bottomright);
             break;
-
         case 10:
-            line(a, b);
-            line(c, d);
+            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft);
+            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright);
             break;
         case 11:
-            line(a, b);
+            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft);
             break;
         case 12:
-            line(b, d);
+            line(cell.pointb, cell.pointd,cell.topright,cell.bottomright);
             break;
 
         case 13:
-            line(b, c);
+            line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft);
             break;
 
         case 14:
-            line(c, d);
+            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright);
             break;
     }
 }
@@ -200,14 +205,19 @@ void checkValues(LineCell cell) {
     double botr = floor(cell.bottomright / isoline_value);
     if (topl == topr && topr == botl && botl == botr) { ;
     } else {
-        cout<<cell.topleft<<" "<<cell.topright<<" "<<cell.bottomleft<<" "<<cell.bottomright<<endl;
+//        cout<<cell.topleft<<" "<<cell.topright<<" "<<cell.bottomleft<<" "<<cell.bottomright<<endl;
         int minvalue = findMin(topl, topr, botl, botr);
-        int a = ceil(topl / minvalue) - 1;
-        int b = ceil(topr / minvalue) - 1;
-        int c = ceil(botl / minvalue) - 1;
-        int d = ceil(botr / minvalue) - 1;
-        int result = getState(a, b, c, d);
-        generateLines(result, cell.pointa, cell.pointb, cell.pointc, cell.pointd);
+        int topleft = ceil(topl / minvalue) - 1;
+        int topright = ceil(topr / minvalue) - 1;
+        int bottomleft = ceil(botl / minvalue) - 1;
+        int bottomright = ceil(botr / minvalue) - 1;
+        int result = getState(topleft, topright, bottomright, bottomleft);
+//        if(result == 2){
+//            cout<<"a = "<<a<<"b = "<<b<<"c = "<<c<<"d = "<<d<<endl;
+//            cout<<"a = "<<topl<<"b = "<<topr<<"c = "<<botl<<"d ="<<botr<<endl;
+//            cout<<"a = "<<cell.topleft<<"b = "<<cell.topright<<"c = "<<cell.bottomleft<<"d ="<<cell.bottomright<<endl;
+//        }
+        generateLines(result, cell);
     }
 }
 
