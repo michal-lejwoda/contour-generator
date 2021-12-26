@@ -10,6 +10,7 @@
 #include "grid.h"
 #include "cell.h"
 #include "gdal/cpl_string.h"
+//#include "ogrsf_frmts.h"
 double cellsize = 0.5;
 int minx;
 int miny;
@@ -34,7 +35,6 @@ int main() {
     halfminy = miny/2;
     tab = vector<vector<Cell>>( minx , vector<Cell> (miny));
     arr = vector<vector<LineCell>> (halfminx, vector<LineCell>(halfminy));
-
     clock_t start = clock();
     Grid grid;
     grid.generateGrid(header,reader);
@@ -46,6 +46,38 @@ int main() {
     double elapsed = double(end - start)/CLOCKS_PER_SEC;
     printf("Time measured: %.3f seconds.\n", elapsed);
 
+//tworzenie wektora
+    const char* wkt= "POINT(12 1)";
+
+// cast because OGR_G_CreateFromWkt will move the pointer
+//    char* pszWkt = (char*) wkt;
+//    OGRSpatialReferenceH ref = OSRNewSpatialReference(NULL);
+//    OGRGeometryH new_geom;
+//    OSRSetAxisMappingStrategy(NULL, OAMS_TRADITIONAL_GIS_ORDER);
+//    OGRErr err = OGR_G_CreateFromWkt(&pszWkt, ref, &new_geom);
+//    cout<<err<<endl;
+
+
+    const char *pszDriverName = "ESRI Shapefile";
+    GDALDriver *poDriver;
+    poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName );
+    if( poDriver == NULL )
+    {
+        printf( "%s driver not available.\n", pszDriverName );
+        exit( 1 );
+    }
+    GDALDataset *poDS;
+    poDS = (GDALDataset*) GDALOpenEx( "/home/saxatachi/Desktop/line.shp", GDAL_OF_VECTOR, NULL, NULL, NULL );
+    OGRLayer  *poLayer = poDS->GetLayerByName( "line" );
+//    OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
+//    poLayer->ResetReading();
+    OGRFeature *poFeature;
+    //    poDS = poDriver->Create( "point_out.shp", 0, 0, 0, GDT_Unknown, NULL );
+//    if( poDS == NULL )
+//    {
+//        printf( "Creation of output file failed.\n" );
+//        exit( 1 );
+//    }
 
 
 

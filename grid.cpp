@@ -216,6 +216,11 @@ void checkeveryvaluev2(){
         }
     }
 }
+void checkarray(){
+    for(int i=0;i<array_with_lines.size();i++){
+        cout<<"linia "<<array_with_lines[i].value<<endl;
+    }
+}
 
 void Grid::idw() {
     for (int i = 0; i < minx; i++) {
@@ -303,6 +308,7 @@ void Grid::get_data_of_every_cell(liblas::Header header) {
             checkValues(arr[i][j]);
         }
     }
+    checkarray();
 }
 
 
