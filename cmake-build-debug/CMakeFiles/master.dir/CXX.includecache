@@ -53,4 +53,6 @@ cell.h
 /home/saxatachi/CLionProjects/master/cell.h
 gdal/cpl_string.h
 /home/saxatachi/CLionProjects/master/gdal/cpl_string.h
+gdal/ogrsf_frmts.h
+/home/saxatachi/CLionProjects/master/gdal/ogrsf_frmts.h
 

@@ -10,7 +10,7 @@
 #include "grid.h"
 #include "cell.h"
 #include "gdal/cpl_string.h"
-//#include "ogrsf_frmts.h"
+#include "gdal/ogrsf_frmts.h"
 double cellsize = 0.5;
 int minx;
 int miny;
@@ -61,17 +61,103 @@ int main() {
     const char *pszDriverName = "ESRI Shapefile";
     GDALDriver *poDriver;
     poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName );
-    if( poDriver == NULL )
+    GDALDataset *poDS;
+    poDS = poDriver->Create( "/home/saxatachi/Desktop/lines4.shp", 0, 0, 0, GDT_Unknown, NULL );
+    OGRLayer *poLayer;
+    poLayer = poDS->CreateLayer( "line_out", NULL, wkbLineString, NULL );
+    OGRFieldDefn oField( "Name", OFTString );
+//    OGRFieldDefn oField("Value",OFTString);
+    oField.SetWidth(32);
+    if( poLayer->CreateField( &oField ) != OGRERR_NONE )
     {
-        printf( "%s driver not available.\n", pszDriverName );
+        printf( "Creating Name field failed.\n" );
         exit( 1 );
     }
-    GDALDataset *poDS;
-    poDS = (GDALDataset*) GDALOpenEx( "/home/saxatachi/Desktop/line.shp", GDAL_OF_VECTOR, NULL, NULL, NULL );
-    OGRLayer  *poLayer = poDS->GetLayerByName( "line" );
+//    double x, y;
+
+    OGRFeature *poFeature;
+    poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+//    poFeature->SetField("Name", 72);
+    OGRLineString ls;
+    for(int i=0;i<array_with_lines.size();i++){
+        ls.addPoint(array_with_lines[i].point1.x,array_with_lines[i].point1.y);
+        ls.addPoint(array_with_lines[i].point2.x,array_with_lines[i].point2.y);
+    }
+//    ls.addPoint(12,8);
+//    ls.addPoint(34,32);
+//    ls.addPoint(64,45);
+    poFeature->SetGeometry(&ls);
+
+    if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
+    {
+        printf( "Failed to create feature in shapefile.\n" );
+        exit( 1 );
+    }
+    cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
+    OGRFeature::DestroyFeature( poFeature );
+    GDALClose( poDS );
+
+
+//    poDS = (GDALDataset*) GDALOpenEx( "/home/saxatachi/Desktop/line.shp", GDAL_OF_VECTOR, NULL, NULL, NULL );
+//    OGRLayer  *poLayer = poDS->GetLayerByName( "line" );
 //    OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
 //    poLayer->ResetReading();
-    OGRFeature *poFeature;
+//    OGRFeature *poFeature;
+//    while( (poFeature = poLayer->GetNextFeature()) != NULL )
+//    {
+//        cout<<"wynik "<<poFeature->GetFieldAsDouble(0)<<endl;
+//        cout<<"wynik2 "<<poFeature->GetFieldAsDouble(1)<<endl;
+//        cout<<"wynik3 "<<poFeature->GetGeomFieldRef(1)<<endl;
+//        cout<<poFeature->GetGeometryRef()->getGeometryType()<<endl;
+//        cout<<"kk "<<poFeature->GetGeometryRef()<<endl;
+//        cout<<"wynik4 "<<poFeature->GetGeometryRef()->getCurveGeometry()<<endl;
+//        cout<<"MultiLineString "<<wkbMultiLineString<<endl;
+//        cout<<"LineString "<<wkbLineString<<endl;
+//        OGRLineString *poLine = poFeature->GetGeometryRef()->toLineString();
+//        cout<<"poline "<<poLine->exportToJson()<<endl;
+//        char const *p = (char*) malloc (sizeof(char)*40);
+//        char **tablicaa = new char * [0];
+//        cout<<"poline wkt "<<poLine->exportToWkt(tablicaa)<<endl;
+//        cout<<"poline wkt "<<poLine->exportToKML()<<endl;
+//        for( int iField = 0; iField < poFDefn->GetFieldCount(); iField++ )
+//        {
+//            OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn( iField );
+
+//            switch( poFieldDefn->GetType() )
+//            {
+//                case OFTInteger:
+//                    printf( "%d,", poFeature->GetFieldAsInteger( iField ) );
+//                    break;
+//                case OFTInteger64:
+//                    printf( CPL_FRMT_GIB ",", poFeature->GetFieldAsInteger64( iField ) );
+//                    break;
+//                case OFTReal:
+//                    printf( "%.3f,", poFeature->GetFieldAsDouble(iField) );
+//                    break;
+//                case OFTString:
+//                    printf( "%s,", poFeature->GetFieldAsString(iField) );
+//                    break;
+//                default:
+//                    printf( "%s,", poFeature->GetFieldAsString(iField) );
+//                    break;
+//            }
+//        }
+
+//        OGRGeometry *poGeometry = poFeature->GetGeometryRef();
+//        cout<<wkbFlatten(poGeometry->getGeometryType())<<endl;
+//        cout<<"wkbLineString = "<<wkbLineString<<endl;
+
+
+//        OGRMultiLineString *poLine = (OGRMultiLineString *) poGeometry;
+//        OGRLineString *testLine = (OGRLineString *)poFeature->getGeometryRef(0);
+//        cout<<"area "<< testLine->get_Area()<<endl;
+//            printf( "%.3f,%3.f\n", poPoint->getX(), poPoint->getY() );
+//            poLine->
+
+
+//        OGRFeature::DestroyFeature( poFeature );
+//    }
+
     //    poDS = poDriver->Create( "point_out.shp", 0, 0, 0, GDT_Unknown, NULL );
 //    if( poDS == NULL )
 //    {
@@ -195,3 +281,4 @@ int main() {
     return 0;
 
 }
+
