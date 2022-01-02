@@ -62,39 +62,67 @@ int main() {
     GDALDriver *poDriver;
     poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName );
     GDALDataset *poDS;
-    poDS = poDriver->Create( "/home/saxatachi/Desktop/lines4.shp", 0, 0, 0, GDT_Unknown, NULL );
+    poDS = poDriver->Create( "/home/saxatachi/Desktop/lines74.shp", 0, 0, 0, GDT_Unknown, NULL );
     OGRLayer *poLayer;
-    poLayer = poDS->CreateLayer( "line_out", NULL, wkbLineString, NULL );
-    OGRFieldDefn oField( "Name", OFTString );
-//    OGRFieldDefn oField("Value",OFTString);
-    oField.SetWidth(32);
-    if( poLayer->CreateField( &oField ) != OGRERR_NONE )
-    {
-        printf( "Creating Name field failed.\n" );
-        exit( 1 );
-    }
-//    double x, y;
+    poLayer = poDS->CreateLayer( "line_out", NULL, wkbMultiLineString, NULL );
 
+//    wkbMultiCurve
+//    poDS->CreateLayer( "line_out2", NULL, wkbMultiLineString, NULL );
+//    OGRFieldDefn oField("Name",OFTString);
+
+    OGRFieldDefn oField("Value",OFTString);
+
+    oField.SetWidth(32);
+    poLayer->CreateField(&oField);
     OGRFeature *poFeature;
+    OGRFeature *poFeature1;
     poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-//    poFeature->SetField("Name", 72);
-    OGRLineString ls;
+    poFeature1 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+    poLayer->SetFeature(poFeature);
+    poLayer->SetFeature(poFeature1);
+    OGRMultiLineString mls;
+    OGRMultiLineString mls2;
     for(int i=0;i<array_with_lines.size();i++){
+        OGRFeature *poFeature2;
+        poFeature2 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+        poLayer->SetFeature(poFeature2);
+        OGRLineString ls;
         ls.addPoint(array_with_lines[i].point1.x,array_with_lines[i].point1.y);
         ls.addPoint(array_with_lines[i].point2.x,array_with_lines[i].point2.y);
+        mls2.addGeometry(&ls);
+        poFeature2->SetGeometry(&mls2);
+//        cout<<"Feature2"<< poFeature2->GetGeometryRef()->exportToJson()<<endl;
+        poFeature1->SetField( "Value", array_with_lines[i].value);
+        poLayer->CreateFeature(poFeature1);
     }
-//    ls.addPoint(12,8);
-//    ls.addPoint(34,32);
-//    ls.addPoint(64,45);
-    poFeature->SetGeometry(&ls);
+    OGRLineString ls1;
+    ls1.addPoint(12,12);
+    ls1.addPoint(14,16);
+    ls1.addPoint(16,24);
+    mls2.addGeometry(&ls1);
+    poFeature->SetGeometry(&mls);
+    poFeature1->SetGeometry(&mls2);
 
-    if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
-    {
-        printf( "Failed to create feature in shapefile.\n" );
-        exit( 1 );
-    }
+    cout<<"OField "<<oField.GetFieldTypeName<<endl;
+    poLayer->CreateFeature(poFeature);
+    poLayer->CreateFeature(poFeature1);
+    cout<<"gtf " <<poLayer->GetFeatureCount()<<endl;
+
+//    ls.addPoint(64,45);
+//    poFeature->SetGeometry(&ls);
+
+//    if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
+//    {
+//        printf( "Failed to create feature in shapefile.\n" );
+//        exit( 1 );
+//    }
+//    cout<<"GEt Features"<<poDS->GetFeatures()<<endl;
     cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
+    cout<<poFeature1->GetGeometryRef()->exportToJson()<<endl;
+
     OGRFeature::DestroyFeature( poFeature );
+    OGRFeature::DestroyFeature( poFeature1 );
+//    OGRFeature::DestroyFeature( poFeature2 );
     GDALClose( poDS );
 
 
