@@ -14,12 +14,14 @@
 double cellsize = 0.5;
 int minx;
 int miny;
-int halfminx;
-int halfminy;
 std::vector<std::vector<Cell>> tab;
 std::vector<std::vector<LineCell>> arr;
 std::vector<Line> array_with_lines;
 double isoline_value = 2;
+bool compareLine(Line l1, Line l2)
+{
+    return (l1.value < l2.value);
+}
 int main() {
     GDALAllRegister();
     cout.precision(15);
@@ -31,10 +33,8 @@ int main() {
     liblas::Header const& header = reader.GetHeader();
     minx = ceil((header.GetMaxX() - header.GetMinX())/cellsize);
     miny = ceil((header.GetMaxY() - header.GetMinY())/cellsize);
-    halfminx = minx/2;
-    halfminy = miny/2;
     tab = vector<vector<Cell>>( minx , vector<Cell> (miny));
-    arr = vector<vector<LineCell>> (halfminx, vector<LineCell>(halfminy));
+    arr = vector<vector<LineCell>> (minx-1, vector<LineCell>(miny-1));
     clock_t start = clock();
     Grid grid;
     grid.generateGrid(header,reader);
@@ -46,84 +46,106 @@ int main() {
     double elapsed = double(end - start)/CLOCKS_PER_SEC;
     printf("Time measured: %.3f seconds.\n", elapsed);
 
-//tworzenie wektora
-    const char* wkt= "POINT(12 1)";
 
-// cast because OGR_G_CreateFromWkt will move the pointer
-//    char* pszWkt = (char*) wkt;
-//    OGRSpatialReferenceH ref = OSRNewSpatialReference(NULL);
-//    OGRGeometryH new_geom;
-//    OSRSetAxisMappingStrategy(NULL, OAMS_TRADITIONAL_GIS_ORDER);
-//    OGRErr err = OGR_G_CreateFromWkt(&pszWkt, ref, &new_geom);
-//    cout<<err<<endl;
+    sort(array_with_lines.begin(), array_with_lines.end(), compareLine);
 
-
-    const char *pszDriverName = "ESRI Shapefile";
-    GDALDriver *poDriver;
-    poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName );
     GDALDataset *poDS;
-    poDS = poDriver->Create( "/home/saxatachi/Desktop/lines74.shp", 0, 0, 0, GDT_Unknown, NULL );
-    OGRLayer *poLayer;
-    poLayer = poDS->CreateLayer( "line_out", NULL, wkbMultiLineString, NULL );
-
-//    wkbMultiCurve
-//    poDS->CreateLayer( "line_out2", NULL, wkbMultiLineString, NULL );
-//    OGRFieldDefn oField("Name",OFTString);
-
-    OGRFieldDefn oField("Value",OFTString);
-
-    oField.SetWidth(32);
-    poLayer->CreateField(&oField);
-    OGRFeature *poFeature;
-    OGRFeature *poFeature1;
-    poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-    poFeature1 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-    poLayer->SetFeature(poFeature);
-    poLayer->SetFeature(poFeature1);
-    OGRMultiLineString mls;
-    OGRMultiLineString mls2;
-    for(int i=0;i<array_with_lines.size();i++){
-        OGRFeature *poFeature2;
-        poFeature2 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-        poLayer->SetFeature(poFeature2);
-        OGRLineString ls;
-        ls.addPoint(array_with_lines[i].point1.x,array_with_lines[i].point1.y);
-        ls.addPoint(array_with_lines[i].point2.x,array_with_lines[i].point2.y);
-        mls2.addGeometry(&ls);
-        poFeature2->SetGeometry(&mls2);
-//        cout<<"Feature2"<< poFeature2->GetGeometryRef()->exportToJson()<<endl;
-        poFeature1->SetField( "Value", array_with_lines[i].value);
-        poLayer->CreateFeature(poFeature1);
+    poDS = (GDALDataset*) GDALOpenEx( "/home/saxatachi/Desktop/testaa.shp", GDAL_OF_VECTOR, NULL, NULL, NULL );
+    if( poDS == NULL )
+    {
+        printf( "Open failed.\n" );
+        exit( 1 );
     }
-    OGRLineString ls1;
-    ls1.addPoint(12,12);
-    ls1.addPoint(14,16);
-    ls1.addPoint(16,24);
-    mls2.addGeometry(&ls1);
-    poFeature->SetGeometry(&mls);
-    poFeature1->SetGeometry(&mls2);
+    OGRLayer  *poLayer;
+    poLayer = poDS->GetLayerByName("testaa");
+//    cout<<"name "<<poDS->GetLayer(0)->GetName()<<endl;
+//    cout<<"lines"<<poDS->GetLayerCount()<<endl;
+    for( auto& poFeature: poLayer )
+    {
+        cout<<"feature"<<endl;
+        cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
+    }
 
-    cout<<"OField "<<oField.GetFieldTypeName<<endl;
-    poLayer->CreateFeature(poFeature);
-    poLayer->CreateFeature(poFeature1);
-    cout<<"gtf " <<poLayer->GetFeatureCount()<<endl;
 
-//    ls.addPoint(64,45);
-//    poFeature->SetGeometry(&ls);
 
-//    if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
-//    {
-//        printf( "Failed to create feature in shapefile.\n" );
-//        exit( 1 );
+
+
+
+
+//
+//    const char *pszDriverName = "ESRI Shapefile";
+//    GDALDriver *poDriver;
+//    poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName );
+//    GDALDataset *poDS;
+//    poDS = poDriver->Create( "/home/saxatachi/Desktop/test.shp", 0, 0, 0, GDT_Unknown, NULL );
+//    OGRLayer *poLayer;
+//    poLayer = poDS->CreateLayer( "line_out", NULL, wkbMultiLineString, NULL );
+//    OGRFieldDefn oField("Value",OFTString);
+//    oField.SetWidth(32);
+//    poLayer->CreateField(&oField);
+//    OGRFeature *poFeature;
+//    OGRFeature *poFeature1;
+//    poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+//    poFeature1 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+//    poLayer->SetFeature(poFeature);
+////    poLayer->SetFeature(poFeature1);
+//    OGRMultiLineString mls;
+//    OGRMultiLineString mls2;
+//    for(int i=0;i<array_with_lines.size();i++){
+//
+//        OGRFeature *poFeature2;
+//        poFeature2 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+//        poLayer->SetFeature(poFeature2);
+//        OGRLineString ls;
+//        ls.addPoint(array_with_lines[i].point1.x,array_with_lines[i].point1.y);
+//        ls.addPoint(array_with_lines[i].point2.x,array_with_lines[i].point2.y);
+//        mls2.addGeometry(&ls);
+//        poFeature2->SetGeometry(&mls2);
+////        cout<<"Feature2"<< poFeature2->GetGeometryRef()->exportToJson()<<endl;
+//
+//        OGRFeature::DestroyFeature( poFeature2 );
+//        poFeature1->SetField( "Value", array_with_lines[i].value);
+////        poLayer->CreateFeature(poFeature1);
 //    }
-//    cout<<"GEt Features"<<poDS->GetFeatures()<<endl;
-    cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
-    cout<<poFeature1->GetGeometryRef()->exportToJson()<<endl;
+//    poFeature->SetGeometry(&mls);
+//    poFeature1->SetGeometry(&mls2);
+//
+//    cout<<"OField "<<oField.GetFieldTypeName<<endl;
+//    poLayer->CreateFeature(poFeature);
+//    poLayer->CreateFeature(poFeature1);
+//    cout<<"gtf " <<poLayer->GetFeatureCount()<<endl;
+//
+////    ls.addPoint(64,45);
+////    poFeature->SetGeometry(&ls);
+//
+////    if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
+////    {
+////        printf( "Failed to create feature in shapefile.\n" );
+////        exit( 1 );
+////    }
+////    cout<<"GEt Features"<<poDS->GetFeatures()<<endl;
+////    cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
+////    cout<<poFeature1->GetGeometryRef()->exportToJson()<<endl;
+//
+//    OGRFeature::DestroyFeature( poFeature );
+//    OGRFeature::DestroyFeature( poFeature1 );
+////    OGRFeature::DestroyFeature( poFeature2 );
+//    GDALClose( poDS );
+//
 
-    OGRFeature::DestroyFeature( poFeature );
-    OGRFeature::DestroyFeature( poFeature1 );
-//    OGRFeature::DestroyFeature( poFeature2 );
-    GDALClose( poDS );
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //    poDS = (GDALDataset*) GDALOpenEx( "/home/saxatachi/Desktop/line.shp", GDAL_OF_VECTOR, NULL, NULL, NULL );
@@ -192,12 +214,6 @@ int main() {
 //        printf( "Creation of output file failed.\n" );
 //        exit( 1 );
 //    }
-
-
-
-
-
-
 
 
     //tworzenie rastra

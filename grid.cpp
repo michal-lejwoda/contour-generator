@@ -7,8 +7,6 @@ using namespace std;
 extern double cellsize;
 extern int minx;
 extern int miny;
-extern int halfminx;
-extern int halfminy;
 double R;
 extern std::vector<std::vector<Cell>> tab;
 extern std::vector<std::vector<LineCell>> arr;
@@ -290,21 +288,24 @@ void checkValues(LineCell cell) {
 }
 
 void Grid::get_data_of_every_cell(liblas::Header header) {
-    double bigcellsize = cellsize * 2;
-    for (int i = 0; i < halfminx; i++) {
-        for (int j = 0; j < halfminy; j++) {
-            arr[i][j].topleft = tab[i * 2][j * 2].value;
-            arr[i][j].topright = tab[i * 2 + 1][j * 2].value;
-            arr[i][j].bottomleft = tab[i * 2][j * 2 + 1].value;
-            arr[i][j].bottomright = tab[i * 2 + 1][j * 2 + 1].value;
-            arr[i][j].pointa.x = header.GetMinX() + (i * (bigcellsize)) + (cellsize);
-            arr[i][j].pointa.y = header.GetMaxY() - (j * (bigcellsize));
-            arr[i][j].pointb.x = header.GetMinX() + (i * (bigcellsize)) + (cellsize * 2);
-            arr[i][j].pointb.y = header.GetMaxY() - ((j * (bigcellsize)) + (cellsize));
-            arr[i][j].pointc.x = header.GetMinX() + (i * (bigcellsize)) + (cellsize);
-            arr[i][j].pointc.y = header.GetMaxY() - ((j * (bigcellsize)) + (cellsize * 2));
-            arr[i][j].pointd.x = header.GetMinX() + (i * (bigcellsize));
-            arr[i][j].pointd.y = header.GetMaxY() - ((j * (bigcellsize)) + (cellsize));
+    for (int i = 0; i < minx-1; i++) {
+        for (int j = 0; j < miny-1; j++) {
+            arr[i][j].topleft = tab[i][j].value;
+            arr[i][j].topright = tab[i+1][j].value;
+            arr[i][j].bottomleft = tab[i][j+1].value;
+            arr[i][j].bottomright = tab[i+1][j+1].value;
+
+            arr[i][j].pointa.x = header.GetMinX() + (i * (cellsize) + (cellsize));
+            arr[i][j].pointa.y = header.GetMaxY() - (j * (cellsize) + (cellsize/2));
+
+            arr[i][j].pointb.x = header.GetMinX() + (i * (cellsize) + (cellsize+(cellsize/2)));
+            arr[i][j].pointb.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
+
+            arr[i][j].pointc.x = header.GetMinX() + (i * (cellsize) + (cellsize));
+            arr[i][j].pointc.y = header.GetMaxY() - (j * (cellsize) + (cellsize+(cellsize/2)));
+
+            arr[i][j].pointd.x = header.GetMinX() + (i * (cellsize) + (cellsize/2));
+            arr[i][j].pointd.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
             checkValues(arr[i][j]);
         }
     }
