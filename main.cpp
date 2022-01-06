@@ -60,8 +60,6 @@ int main() {
     }
     OGRLayer  *poLayer1;
     poLayer1 = poDS1->GetLayerByName("testaa");
-//    cout<<"name "<<poDS->GetLayer(0)->GetName()<<endl;
-//    cout<<"lines"<<poDS->GetLayerCount()<<endl;
     for( auto& poFeature: poLayer1 )
     {
         cout<<"feature"<<endl;
@@ -87,55 +85,7 @@ int main() {
         Line var1 = temp_array.front();
         int temp_size = temp_array.size();
         for (int i = 0; i < array_with_lines.size(); i++) {
-
-            if(abs(var.i - array_with_lines[i].i) <= 1 && abs(var.j - array_with_lines[i].j) <= 1) {
-//                cout<<"var i "<<var.i<<endl;
-//                cout<<"var j "<<var.j<<endl;
-//                cout<<"array_with_Lines i "<<array_with_lines[i].i<<endl;
-//                cout<<"array_with_Lines j "<<array_with_lines[i].j<<endl;
-//                cout<<"Var points 1"<<var.point1.x<<" "<<var.point1.y<<endl;
-//                cout<<"Var points 2"<<var.point2.x<<" "<<var.point2.y<<endl;
-//                cout<<"array points 1"<<array_with_lines[i].point1.x<<" "<<array_with_lines[i].point1.y<<endl;
-//                cout<<"array points 2"<<array_with_lines[i].point2.x<<" "<<array_with_lines[i].point2.y<<endl;
-//                cout<<"test1 = "<<sqrt(pow((var.point1.x-array_with_lines[i].point1.x),2)+pow(var.point1.y-array_with_lines[i].point1.y,2))<<endl;
-//                cout<<"test2 = "<<sqrt(pow((var.point1.x-array_with_lines[i].point2.x),2)+pow(var.point1.y-array_with_lines[i].point2.y,2))<<endl;
-//                cout<<"test3 = "<<sqrt(pow((var.point2.x-array_with_lines[i].point1.x),2)+pow(var.point2.y-array_with_lines[i].point1.y,2))<<endl;
-//                cout<<"test4 = "<<sqrt(pow((var.point2.x-array_with_lines[i].point2.x),2)+pow(var.point2.y-array_with_lines[i].point2.y,2))<<endl;
-
-//                if(sqrt(pow((var.point1.x-array_with_lines[i].point1.x),2)+pow(var.point1.y-array_with_lines[i].point1.y,2))<0.1){
-//                    it = array_with_lines.begin() + i;
-////                    cout<<"testtt "<<it->point1.x<<" "<<it->point1.y<<" "<<it->point2.x<<it->point2.y<<endl;
-////                    cout<<"testt2 "<<array_with_lines[i].point1.x<<" "<<array_with_lines[i].point1.y<<" "<<array_with_lines[i].point2.x<<array_with_lines[i].point2.y<<endl;
-//                    temp_array.push_back(array_with_lines[i]);
-//                    array_with_lines.erase(it);
-//                    break;
-//                }
-//                if(sqrt(pow((var.point1.x-array_with_lines[i].point2.x),2)+pow(var.point1.y-array_with_lines[i].point2.y,2))<0.1){
-//                    Point temp_var = array_with_lines[i].point2;
-//                    array_with_lines[i].point2 = array_with_lines[i].point1;
-//                    array_with_lines[i].point1 = temp_var;
-//                    it = array_with_lines.begin() + i;
-//                    temp_array.push_back(array_with_lines[i]);
-//                    int tescik1 = temp_array.size();
-//                    array_with_lines.erase(it);
-//                    break;
-//                }
-//                if(sqrt(pow((var.point2.x-array_with_lines[i].point1.x),2)+pow(var.point2.y-array_with_lines[i].point1.y,2))<0.1){
-//                    it = array_with_lines.begin() + i;
-//                    temp_array.insert(temp_array.begin(),1,array_with_lines[i]);
-//                    array_with_lines.erase(it);
-//                    break;
-//                }
-//                if(sqrt(pow((var.point2.x-array_with_lines[i].point2.x),2)+pow(var.point2.y-array_with_lines[i].point2.y,2))<0.1){
-//                    Point temp_var = array_with_lines[i].point2;
-//                    array_with_lines[i].point2 = array_with_lines[i].point1;
-//                    array_with_lines[i].point1 = temp_var;
-//                    it = array_with_lines.begin() + i;
-//                    temp_array.insert(temp_array.begin(),1,array_with_lines[i]);
-//                    int tescik3 = temp_array.size();
-//                    array_with_lines.erase(it);
-//                    break;
-//                }
+            if(abs(var.i - array_with_lines[i].i) <= 1 && abs(var.j - array_with_lines[i].j) <= 1 ||abs(var1.i - array_with_lines[i].i) <= 1 && abs(var1.j - array_with_lines[i].j) <= 1  ) {
                 if (sqrt(pow((var.point2.x - array_with_lines[i].point1.x), 2) +
                          pow(var.point2.y - array_with_lines[i].point1.y, 2)) < 0.05) {
                     it = array_with_lines.begin() + i;
@@ -170,9 +120,6 @@ int main() {
                 }
             }
         }
-
-//        cout<<"temp_size"<<temp_size<<endl;
-//        cout<<"temp_array_size"<<temp_array.size()<<endl;
         if(temp_size == temp_array.size()){
             cout<<"Wielkość tablicy"<< temp_array.size()<<endl;
             OGRLineString ls;
@@ -198,6 +145,17 @@ int main() {
         }
     }
 
+//    for( auto& poFeature: poLayer )
+//    {
+//        cout<<"feature"<<endl;
+//        cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
+//    }
+    for( auto& poFeature1: poLayer1 )
+    {
+        cout<<"feature1"<<endl;
+//        cout<<poFeature1->GetGeometryRef()->exportToWkt()<<endl;
+//        String feature = poFeature1->GetGeometryRef()->exportToWkt();
+    }
 
 
 
