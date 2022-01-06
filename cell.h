@@ -28,7 +28,9 @@ struct Line{
     Point point1;
     Point point2;
     double value;
-    Line(Point point1_,Point point2_,double value_):point1(point1_), point2(point2_), value(value_) {}
+    int i;
+    int j;
+    Line(Point point1_,Point point2_,double value_,int i_,int j_):point1(point1_), point2(point2_), value(value_),i(i_),j(j_) {}
 };
 struct Cell {
     double centerx;

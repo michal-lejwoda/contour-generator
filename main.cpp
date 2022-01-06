@@ -11,12 +11,14 @@
 #include "cell.h"
 #include "gdal/cpl_string.h"
 #include "gdal/ogrsf_frmts.h"
+#include <cmath>
 double cellsize = 0.5;
 int minx;
 int miny;
 std::vector<std::vector<Cell>> tab;
 std::vector<std::vector<LineCell>> arr;
 std::vector<Line> array_with_lines;
+std::vector<OGRFeature> features;
 double isoline_value = 2;
 bool compareLine(Line l1, Line l2)
 {
@@ -47,23 +49,153 @@ int main() {
     printf("Time measured: %.3f seconds.\n", elapsed);
 
 
-    sort(array_with_lines.begin(), array_with_lines.end(), compareLine);
-
-    GDALDataset *poDS;
-    poDS = (GDALDataset*) GDALOpenEx( "/home/saxatachi/Desktop/testaa.shp", GDAL_OF_VECTOR, NULL, NULL, NULL );
-    if( poDS == NULL )
+//    sort(array_with_lines.begin(), array_with_lines.end(), compareLine);
+//
+    GDALDataset *poDS1;
+    poDS1 = (GDALDataset*) GDALOpenEx( "/home/saxatachi/Desktop/testaa.shp", GDAL_OF_VECTOR, NULL, NULL, NULL );
+    if( poDS1 == NULL )
     {
         printf( "Open failed.\n" );
         exit( 1 );
     }
-    OGRLayer  *poLayer;
-    poLayer = poDS->GetLayerByName("testaa");
+    OGRLayer  *poLayer1;
+    poLayer1 = poDS1->GetLayerByName("testaa");
 //    cout<<"name "<<poDS->GetLayer(0)->GetName()<<endl;
 //    cout<<"lines"<<poDS->GetLayerCount()<<endl;
-    for( auto& poFeature: poLayer )
+    for( auto& poFeature: poLayer1 )
     {
         cout<<"feature"<<endl;
         cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
+    }
+    std::vector<Line> temp_array;
+    temp_array.push_back(array_with_lines[0]);
+    vector <Line>::iterator it;
+    it = array_with_lines.begin();
+    array_with_lines.erase(it);
+    const char *pszDriverName = "ESRI Shapefile";
+    GDALDriver *poDriver;
+    poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName );
+    GDALDataset *poDS;
+    poDS = poDriver->Create( "/home/saxatachi/Desktop/testjednejlinii.shp", 0, 0, 0, GDT_Unknown, NULL );
+    OGRLayer *poLayer;
+    poLayer = poDS->CreateLayer( "line_out", NULL, wkbLineString, NULL );
+    OGRFieldDefn oField("Value",OFTString);
+    oField.SetWidth(32);
+    poLayer->CreateField(&oField);
+    while(array_with_lines.size()!= 0) {
+        Line var = temp_array.back();
+        Line var1 = temp_array.front();
+        int temp_size = temp_array.size();
+        for (int i = 0; i < array_with_lines.size(); i++) {
+
+            if(abs(var.i - array_with_lines[i].i) <= 1 && abs(var.j - array_with_lines[i].j) <= 1) {
+//                cout<<"var i "<<var.i<<endl;
+//                cout<<"var j "<<var.j<<endl;
+//                cout<<"array_with_Lines i "<<array_with_lines[i].i<<endl;
+//                cout<<"array_with_Lines j "<<array_with_lines[i].j<<endl;
+//                cout<<"Var points 1"<<var.point1.x<<" "<<var.point1.y<<endl;
+//                cout<<"Var points 2"<<var.point2.x<<" "<<var.point2.y<<endl;
+//                cout<<"array points 1"<<array_with_lines[i].point1.x<<" "<<array_with_lines[i].point1.y<<endl;
+//                cout<<"array points 2"<<array_with_lines[i].point2.x<<" "<<array_with_lines[i].point2.y<<endl;
+//                cout<<"test1 = "<<sqrt(pow((var.point1.x-array_with_lines[i].point1.x),2)+pow(var.point1.y-array_with_lines[i].point1.y,2))<<endl;
+//                cout<<"test2 = "<<sqrt(pow((var.point1.x-array_with_lines[i].point2.x),2)+pow(var.point1.y-array_with_lines[i].point2.y,2))<<endl;
+//                cout<<"test3 = "<<sqrt(pow((var.point2.x-array_with_lines[i].point1.x),2)+pow(var.point2.y-array_with_lines[i].point1.y,2))<<endl;
+//                cout<<"test4 = "<<sqrt(pow((var.point2.x-array_with_lines[i].point2.x),2)+pow(var.point2.y-array_with_lines[i].point2.y,2))<<endl;
+
+//                if(sqrt(pow((var.point1.x-array_with_lines[i].point1.x),2)+pow(var.point1.y-array_with_lines[i].point1.y,2))<0.1){
+//                    it = array_with_lines.begin() + i;
+////                    cout<<"testtt "<<it->point1.x<<" "<<it->point1.y<<" "<<it->point2.x<<it->point2.y<<endl;
+////                    cout<<"testt2 "<<array_with_lines[i].point1.x<<" "<<array_with_lines[i].point1.y<<" "<<array_with_lines[i].point2.x<<array_with_lines[i].point2.y<<endl;
+//                    temp_array.push_back(array_with_lines[i]);
+//                    array_with_lines.erase(it);
+//                    break;
+//                }
+//                if(sqrt(pow((var.point1.x-array_with_lines[i].point2.x),2)+pow(var.point1.y-array_with_lines[i].point2.y,2))<0.1){
+//                    Point temp_var = array_with_lines[i].point2;
+//                    array_with_lines[i].point2 = array_with_lines[i].point1;
+//                    array_with_lines[i].point1 = temp_var;
+//                    it = array_with_lines.begin() + i;
+//                    temp_array.push_back(array_with_lines[i]);
+//                    int tescik1 = temp_array.size();
+//                    array_with_lines.erase(it);
+//                    break;
+//                }
+//                if(sqrt(pow((var.point2.x-array_with_lines[i].point1.x),2)+pow(var.point2.y-array_with_lines[i].point1.y,2))<0.1){
+//                    it = array_with_lines.begin() + i;
+//                    temp_array.insert(temp_array.begin(),1,array_with_lines[i]);
+//                    array_with_lines.erase(it);
+//                    break;
+//                }
+//                if(sqrt(pow((var.point2.x-array_with_lines[i].point2.x),2)+pow(var.point2.y-array_with_lines[i].point2.y,2))<0.1){
+//                    Point temp_var = array_with_lines[i].point2;
+//                    array_with_lines[i].point2 = array_with_lines[i].point1;
+//                    array_with_lines[i].point1 = temp_var;
+//                    it = array_with_lines.begin() + i;
+//                    temp_array.insert(temp_array.begin(),1,array_with_lines[i]);
+//                    int tescik3 = temp_array.size();
+//                    array_with_lines.erase(it);
+//                    break;
+//                }
+                if (sqrt(pow((var.point2.x - array_with_lines[i].point1.x), 2) +
+                         pow(var.point2.y - array_with_lines[i].point1.y, 2)) < 0.05) {
+                    it = array_with_lines.begin() + i;
+                    temp_array.push_back(array_with_lines[i]);
+                    array_with_lines.erase(it);
+                    break;
+                }
+                if (sqrt(pow((var.point2.x - array_with_lines[i].point2.x), 2) +
+                         pow(var.point2.y - array_with_lines[i].point2.y, 2)) < 0.05) {
+                    Point temp_var = array_with_lines[i].point2;
+                    array_with_lines[i].point2 = array_with_lines[i].point1;
+                    array_with_lines[i].point1 = temp_var;
+                    it = array_with_lines.begin() + i;
+                    temp_array.push_back(array_with_lines[i]);
+                    array_with_lines.erase(it);
+                    break;
+                }
+                if(sqrt(pow((var1.point1.x-array_with_lines[i].point1.x),2)+pow(var1.point1.y-array_with_lines[i].point1.y,2))<0.05){
+                    Point temp_var = array_with_lines[i].point2;
+                    array_with_lines[i].point2 = array_with_lines[i].point1;
+                    array_with_lines[i].point1 = temp_var;
+                    it = array_with_lines.begin() + i;
+                    temp_array.insert(temp_array.begin(),1,array_with_lines[i]);
+                    array_with_lines.erase(it);
+                    break;
+                }
+                if(sqrt(pow((var1.point1.x-array_with_lines[i].point2.x),2)+pow(var1.point1.y-array_with_lines[i].point2.y,2))<0.05){
+                    it = array_with_lines.begin() + i;
+                    temp_array.insert(temp_array.begin(),1,array_with_lines[i]);
+                    array_with_lines.erase(it);
+                    break;
+                }
+            }
+        }
+
+//        cout<<"temp_size"<<temp_size<<endl;
+//        cout<<"temp_array_size"<<temp_array.size()<<endl;
+        if(temp_size == temp_array.size()){
+            cout<<"Wielkość tablicy"<< temp_array.size()<<endl;
+            OGRLineString ls;
+            OGRFeature *poFeature3;
+            poFeature3 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+            poFeature3->SetField( "Value", temp_array[0].value);
+            for(int i=0;i<temp_array.size();i++){
+                ls.addPoint(temp_array[i].point1.x,temp_array[i].point1.y);
+                ls.addPoint(temp_array[i].point2.x,temp_array[i].point2.y);
+            }
+            poFeature3->SetGeometry(&ls);
+            poLayer->CreateFeature(poFeature3);
+            cout<<poFeature3->GetGeometryRef()->exportToJson()<<endl;
+
+            cout<<"Liczba "<<poLayer->GetFeatureCount()<<endl;
+            cout<<ls.exportToJson()<<endl;
+            temp_array.clear();
+            if(array_with_lines.size()>0) {
+                temp_array.push_back(array_with_lines[0]);
+                it = array_with_lines.begin();
+                array_with_lines.erase(it);
+            }
+        }
     }
 
 
@@ -72,14 +204,15 @@ int main() {
 
 
 
-//
+
+
 //    const char *pszDriverName = "ESRI Shapefile";
 //    GDALDriver *poDriver;
 //    poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName );
 //    GDALDataset *poDS;
-//    poDS = poDriver->Create( "/home/saxatachi/Desktop/test.shp", 0, 0, 0, GDT_Unknown, NULL );
+//    poDS = poDriver->Create( "/home/saxatachi/Desktop/testjednejlinii.shp", 0, 0, 0, GDT_Unknown, NULL );
 //    OGRLayer *poLayer;
-//    poLayer = poDS->CreateLayer( "line_out", NULL, wkbMultiLineString, NULL );
+//    poLayer = poDS->CreateLayer( "line_out", NULL, wkbLineString, NULL );
 //    OGRFieldDefn oField("Value",OFTString);
 //    oField.SetWidth(32);
 //    poLayer->CreateField(&oField);
@@ -91,6 +224,33 @@ int main() {
 ////    poLayer->SetFeature(poFeature1);
 //    OGRMultiLineString mls;
 //    OGRMultiLineString mls2;
+
+
+
+//    OGRLineString ls;
+//    for(int i=0;i<temp_array.size();i++){
+//        OGRFeature *poFeature2;
+//        poFeature2 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+//        poLayer->SetFeature(poFeature2);
+//        cout<<"ile "<<temp_array[i].point1.x <<" "<<temp_array[i].point1.y<<" "<<temp_array[i].point2.x <<" "<<temp_array[i].point2.y<<endl;
+//        if(i-1>0){
+//            if(temp_array[i-1].point1.x == temp_array[i].point1.x && temp_array[i-1].point1.y == temp_array[i].point1.y){
+//                ls.addPoint(temp_array[i].point1.x,temp_array[i].point1.y);
+//                ls.addPoint(temp_array[i].point2.x,temp_array[i].point2.y);
+//            }else{
+//                ls.addPoint(temp_array[i].point2.x,temp_array[i].point2.y);
+//                ls.addPoint(temp_array[i].point1.x,temp_array[i].point1.y);
+//            }
+//        }
+////        ls.addPoint(array_with_lines[i].point1.x,array_with_lines[i].point1.y);
+////        ls.addPoint(array_with_lines[i].point2.x,array_with_lines[i].point2.y);
+//        mls2.addGeometry(&ls);
+//        poFeature2->SetGeometry(&mls2);
+//
+////        cout<<"x i y = "<<temp_array[i].point1.x<<" "<<temp_array[i].point1.y<<endl;
+////        cout<<"x2 i y2 = "<<temp_array[i].point2.x<<" "<<temp_array[i].point2.y<<endl;
+//    }
+
 //    for(int i=0;i<array_with_lines.size();i++){
 //
 //        OGRFeature *poFeature2;
@@ -107,31 +267,33 @@ int main() {
 //        poFeature1->SetField( "Value", array_with_lines[i].value);
 ////        poLayer->CreateFeature(poFeature1);
 //    }
+//    poFeature1->SetGeometry(&ls);
 //    poFeature->SetGeometry(&mls);
 //    poFeature1->SetGeometry(&mls2);
-//
+//    cout<<"Feature2"<< poFeature2->GetGeometryRef()->exportToJson()<<endl;
+
 //    cout<<"OField "<<oField.GetFieldTypeName<<endl;
 //    poLayer->CreateFeature(poFeature);
 //    poLayer->CreateFeature(poFeature1);
 //    cout<<"gtf " <<poLayer->GetFeatureCount()<<endl;
-//
-////    ls.addPoint(64,45);
-////    poFeature->SetGeometry(&ls);
-//
-////    if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
-////    {
-////        printf( "Failed to create feature in shapefile.\n" );
-////        exit( 1 );
-////    }
-////    cout<<"GEt Features"<<poDS->GetFeatures()<<endl;
-////    cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
-////    cout<<poFeature1->GetGeometryRef()->exportToJson()<<endl;
-//
+
+//    ls.addPoint(64,45);
+//    poFeature->SetGeometry(&ls);
+
+//    if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
+//    {
+//        printf( "Failed to create feature in shapefile.\n" );
+//        exit( 1 );
+//    }
+//    cout<<"GEt Features"<<poDS->GetFeatures()<<endl;
+//    cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
+//    cout<<poFeature1->GetGeometryRef()->exportToJson()<<endl;
+
 //    OGRFeature::DestroyFeature( poFeature );
 //    OGRFeature::DestroyFeature( poFeature1 );
-////    OGRFeature::DestroyFeature( poFeature2 );
-//    GDALClose( poDS );
-//
+//    OGRFeature::DestroyFeature( poFeature2 );
+    GDALClose( poDS );
+
 
 
 

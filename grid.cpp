@@ -87,14 +87,14 @@ double Grid::neighbours(int x, int y) {
     return tab[x][y].value = 77;
 }
 
-void line(Point point1, Point point2, double firstpoint,double secondpoint) {
+void line(Point point1, Point point2, double firstpoint,double secondpoint,int i,int j) {
     if(floor(firstpoint/isoline_value) == ceil(secondpoint/isoline_value)){
 //        cout<<"Pierwsza petla = "<<(floor(firstpoint/isoline_value)*isoline_value)<<endl;
-        Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value));
+        Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),i,j);
         array_with_lines.push_back(temp_line);
     }else if(floor(secondpoint/isoline_value) == ceil(firstpoint/isoline_value)){
 //        cout<<"Druga petla = "<<(floor(secondpoint/isoline_value)*2)<<endl;
-        Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value));
+        Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),i,j);
         array_with_lines.push_back(temp_line);
     }else{
         //Za duża róznica
@@ -106,54 +106,54 @@ void line(Point point1, Point point2, double firstpoint,double secondpoint) {
     }
 }
 
-void generateLines(int state, LineCell cell) {
+void generateLines(int state, LineCell cell,int i,int j) {
     switch (state) {
         case 1:
-            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright);
+            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j);
             break;
         case 2:
-            line(cell.pointb, cell.pointc,cell.topleft,cell.bottomright);
+            line(cell.pointb, cell.pointc,cell.topleft,cell.bottomright,i,j);
             break;
         case 3:
-            line(cell.pointb, cell.pointd,cell.topright,cell.bottomleft);
+            line(cell.pointb, cell.pointd,cell.topright,cell.bottomleft,i,j);
             break;
         case 4:
-            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft);
+            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j);
             break;
         case 5:
-            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft);
-            line(cell.pointb, cell.pointc,cell.bottomright,cell.topright);
+            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft,i,j);
+            line(cell.pointb, cell.pointc,cell.bottomright,cell.topright,i,j);
 //            cout<<"cell.topleft "<<cell.topleft<<" cell.bottomright "<<cell.bottomright<<" cell.topright "<<cell.topright<<" cell.bottomleft "<<cell.bottomleft<<endl;
             break;
         case 6:
-            line(cell.pointa, cell.pointc,cell.topleft,cell.topright);
+            line(cell.pointa, cell.pointc,cell.topleft,cell.topright,i,j);
             break;
         case 7:
-            line(cell.pointa, cell.pointd,cell.topleft,cell.topright);
+            line(cell.pointa, cell.pointd,cell.topleft,cell.topright,i,j);
             break;
         case 8:
-            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright);
+            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright,i,j);
             break;
         case 9:
-            line(cell.pointa, cell.pointc,cell.topleft,cell.bottomright);
+            line(cell.pointa, cell.pointc,cell.topleft,cell.bottomright,i,j);
             break;
         case 10:
-            line(cell.pointa, cell.pointb,cell.topright,cell.bottomright);
-            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topleft);
+            line(cell.pointa, cell.pointb,cell.topright,cell.bottomright,i,j);
+            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topleft,i,j);
             break;
         case 11:
-            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft);
+            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j);
             break;
         case 12:
-            line(cell.pointb, cell.pointd,cell.topright,cell.bottomright);
+            line(cell.pointb, cell.pointd,cell.topright,cell.bottomright,i,j);
             break;
 
         case 13:
-            line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft);
+            line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft,i,j);
             break;
 
         case 14:
-            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright);
+            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j);
             break;
     }
 }
@@ -264,7 +264,7 @@ int getState(int a, int b, int c, int d) {
     return a * 8 + b * 4 + c * 2 + d * 1;
 }
 
-void checkValues(LineCell cell) {
+void checkValues(LineCell cell,int i,int j) {
     double topl = floor(cell.topleft / isoline_value);
     double topr = floor(cell.topright / isoline_value);
     double botl = floor(cell.bottomleft / isoline_value);
@@ -283,7 +283,7 @@ void checkValues(LineCell cell) {
 //            cout<<"a = "<<topl<<"b = "<<topr<<"c = "<<botl<<"d ="<<botr<<endl;
 //            cout<<"a = "<<cell.topleft<<"b = "<<cell.topright<<"c = "<<cell.bottomleft<<"d ="<<cell.bottomright<<endl;
 //        }
-        generateLines(result, cell);
+        generateLines(result, cell, i,j);
     }
 }
 
@@ -306,7 +306,7 @@ void Grid::get_data_of_every_cell(liblas::Header header) {
 
             arr[i][j].pointd.x = header.GetMinX() + (i * (cellsize) + (cellsize/2));
             arr[i][j].pointd.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
-            checkValues(arr[i][j]);
+            checkValues(arr[i][j],i,j);
         }
     }
     checkarray();
