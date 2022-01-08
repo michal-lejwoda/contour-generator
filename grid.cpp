@@ -2,7 +2,6 @@
 #include <cmath>
 #include "grid.h"
 #include "cell.h"
-
 using namespace std;
 extern double cellsize;
 extern int minx;
@@ -12,15 +11,6 @@ extern std::vector<std::vector<Cell>> tab;
 extern std::vector<std::vector<LineCell>> arr;
 extern std::vector<Line> array_with_lines;
 extern double isoline_value;
-
-//void checkvalues(){
-//    for (int i = 0; i < minx; i++) {
-//        for (int j = 0; j < miny; j++) {
-//            cout<<"tab["<<i<<"]["<<j<<"] = "<<tab[i][j].value<<endl;
-//        }
-//    }
-//}
-
 
 void Grid::generateGrid(liblas::Header header, liblas::Reader reader) {
     for (int i = 0; i < minx; i++) {
@@ -88,20 +78,11 @@ double Grid::neighbours(int x, int y) {
 
 void line(Point point1, Point point2, double firstpoint,double secondpoint,int i,int j) {
     if(floor(firstpoint/isoline_value) == ceil(secondpoint/isoline_value)){
-//        cout<<"Pierwsza petla = "<<(floor(firstpoint/isoline_value)*isoline_value)<<endl;
         Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),i,j);
         array_with_lines.push_back(temp_line);
     }else if(floor(secondpoint/isoline_value) == ceil(firstpoint/isoline_value)){
-//        cout<<"Druga petla = "<<(floor(secondpoint/isoline_value)*2)<<endl;
         Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),i,j);
         array_with_lines.push_back(temp_line);
-    }else{
-        //Za duża róznica
-        cout<<"za duża różnica "<<firstpoint<<" "<<secondpoint<<endl;
-        cout<<"Pierwsza petla = "<<(floor(firstpoint/isoline_value)*isoline_value)<<endl;
-        cout<<"Druga petla = "<<(floor(secondpoint/isoline_value)*isoline_value)<<endl;
-
-    ;
     }
 }
 
@@ -122,7 +103,6 @@ void generateLines(int state, LineCell cell,int i,int j) {
         case 5:
             line(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft,i,j);
             line(cell.pointb, cell.pointc,cell.bottomright,cell.topright,i,j);
-//            cout<<"cell.topleft "<<cell.topleft<<" cell.bottomright "<<cell.bottomright<<" cell.topright "<<cell.topright<<" cell.bottomleft "<<cell.bottomleft<<endl;
             break;
         case 6:
             line(cell.pointa, cell.pointc,cell.topleft,cell.topright,i,j);
@@ -160,13 +140,10 @@ void generateLines(int state, LineCell cell,int i,int j) {
 void single_cell_idw(int x,int y,vector<double>temp_array){
     double temp = 0;
     for(int i=0;i<temp_array.size();i++){
-//        cout<<"wartosci "<<temp_array[i]<<endl;
         temp += temp_array[i];
     }
     double result = temp/temp_array.size();
-//    cout<<"rezultat = "<<result<<endl;
     tab[x][y].value = result;
-
 }
 
 double neighboursv2(int x, int y){
@@ -174,8 +151,6 @@ double neighboursv2(int x, int y){
     vector <double> temp_array;
     while(true){
         if(temp_array.size()>0){
-//            cout<<"i = "<<i<<endl;
-//            cout<<"końcowy wynik "<<temp_array.size()<<endl;
             single_cell_idw(x,y,temp_array);
             break;
         }
@@ -196,23 +171,22 @@ double neighboursv2(int x, int y){
 void checkeveryvalue(){
     for (int i = 0; i < minx; i++) {
         for (int j = 0; j < miny; j++) {
-//            cout<<"tablica "<<tab[i][j].value<<endl;
             if(tab[i][j].value == 0){
                 neighboursv2(i,j);
             }
         }
     }
 }
-void checkeveryvaluev2(){
-    for (int i = 0; i < minx; i++) {
-        for (int j = 0; j < miny; j++) {
-            cout<<"koniec"<<tab[i][j].value<<endl;
-//            if(tab[i][j].value == 0){
-//                neighboursv2(i,j);
-//            }
-        }
-    }
-}
+//void checkeveryvaluev2(){
+//    for (int i = 0; i < minx; i++) {
+//        for (int j = 0; j < miny; j++) {
+//            cout<<"koniec"<<tab[i][j].value<<endl;
+////            if(tab[i][j].value == 0){
+////                neighboursv2(i,j);
+////            }
+//        }
+//    }
+//}
 void checkarray(){
     for(int i=0;i<array_with_lines.size();i++){
         cout<<"linia "<<array_with_lines[i].value<<endl;
@@ -251,8 +225,6 @@ void Grid::idw() {
         }
     }
     checkeveryvalue();
-//    checkeveryvaluev2();
-
 }
 
 int findMin(int a, int b, int c, int d) {
@@ -270,18 +242,12 @@ void checkValues(LineCell cell,int i,int j) {
     double botr = floor(cell.bottomright / isoline_value);
     if (topl == topr && topr == botl && botl == botr) { ;
     } else {
-//        cout<<cell.topleft<<" "<<cell.topright<<" "<<cell.bottomleft<<" "<<cell.bottomright<<endl;
         int minvalue = findMin(topl, topr, botl, botr);
         int topleft = ceil(topl / minvalue) - 1;
         int topright = ceil(topr / minvalue) - 1;
         int bottomleft = ceil(botl / minvalue) - 1;
         int bottomright = ceil(botr / minvalue) - 1;
         int result = getState(topleft, topright, bottomright, bottomleft);
-//        if(result == 2){
-//            cout<<"a = "<<a<<"b = "<<b<<"c = "<<c<<"d = "<<d<<endl;
-//            cout<<"a = "<<topl<<"b = "<<topr<<"c = "<<botl<<"d ="<<botr<<endl;
-//            cout<<"a = "<<cell.topleft<<"b = "<<cell.topright<<"c = "<<cell.bottomleft<<"d ="<<cell.bottomright<<endl;
-//        }
         generateLines(result, cell, i,j);
     }
 }
@@ -305,6 +271,7 @@ void Grid::get_data_of_every_cell(liblas::Header header) {
 
             arr[i][j].pointd.x = header.GetMinX() + (i * (cellsize) + (cellsize/2));
             arr[i][j].pointd.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
+
             checkValues(arr[i][j],i,j);
         }
     }

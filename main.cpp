@@ -133,11 +133,6 @@ int main() {
     double elapsed = double(end - start)/CLOCKS_PER_SEC;
     printf("Time measured: %.3f seconds.\n", elapsed);
 
-//    for( auto& poFeature: poLayer )
-//    {
-//        cout<<"feature"<<endl;
-//        cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
-//    }
     GDALDriver *poDriver2;
     poDriver2 = GetGDALDriverManager()->GetDriverByName(pszDriverName);
     GDALDataset *poDS2;
@@ -279,6 +274,22 @@ int main() {
 //    OGRFeature::DestroyFeature( poFeature2 );
     GDALClose( poDS );
     GDALClose( poDS2 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
