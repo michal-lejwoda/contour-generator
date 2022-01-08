@@ -12,6 +12,8 @@
 #include "gdal/cpl_string.h"
 #include "gdal/ogrsf_frmts.h"
 #include <cmath>
+#include "json.hpp"
+using json = nlohmann::json;
 double cellsize = 0.5;
 int minx;
 int miny;
@@ -20,10 +22,7 @@ std::vector<std::vector<LineCell>> arr;
 std::vector<Line> array_with_lines;
 std::vector<OGRFeature> features;
 double isoline_value = 2;
-bool compareLine(Line l1, Line l2)
-{
-    return (l1.value < l2.value);
-}
+
 int main() {
     GDALAllRegister();
     cout.precision(15);
@@ -44,13 +43,6 @@ int main() {
 //    grid.idw(tab);
 //    grid.get_center_of_every_cell(header,tab,array);
 //    grid.generateLines(array);
-    clock_t end = clock();
-    double elapsed = double(end - start)/CLOCKS_PER_SEC;
-    printf("Time measured: %.3f seconds.\n", elapsed);
-
-
-//    sort(array_with_lines.begin(), array_with_lines.end(), compareLine);
-//
     GDALDataset *poDS1;
     poDS1 = (GDALDataset*) GDALOpenEx( "/home/saxatachi/Desktop/testaa.shp", GDAL_OF_VECTOR, NULL, NULL, NULL );
     if( poDS1 == NULL )
@@ -60,11 +52,6 @@ int main() {
     }
     OGRLayer  *poLayer1;
     poLayer1 = poDS1->GetLayerByName("testaa");
-    for( auto& poFeature: poLayer1 )
-    {
-        cout<<"feature"<<endl;
-        cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
-    }
     std::vector<Line> temp_array;
     temp_array.push_back(array_with_lines[0]);
     vector <Line>::iterator it;
@@ -134,8 +121,6 @@ int main() {
             poLayer->CreateFeature(poFeature3);
             cout<<poFeature3->GetGeometryRef()->exportToJson()<<endl;
 
-            cout<<"Liczba "<<poLayer->GetFeatureCount()<<endl;
-            cout<<ls.exportToJson()<<endl;
             temp_array.clear();
             if(array_with_lines.size()>0) {
                 temp_array.push_back(array_with_lines[0]);
@@ -144,17 +129,59 @@ int main() {
             }
         }
     }
+    clock_t end = clock();
+    double elapsed = double(end - start)/CLOCKS_PER_SEC;
+    printf("Time measured: %.3f seconds.\n", elapsed);
 
 //    for( auto& poFeature: poLayer )
 //    {
 //        cout<<"feature"<<endl;
 //        cout<<poFeature->GetGeometryRef()->exportToJson()<<endl;
 //    }
-    for( auto& poFeature1: poLayer1 )
+    GDALDriver *poDriver2;
+    poDriver2 = GetGDALDriverManager()->GetDriverByName(pszDriverName);
+    GDALDataset *poDS2;
+    poDS2 = poDriver2->Create( "/home/saxatachi/Desktop/smooth1.shp", 0, 0, 0, GDT_Unknown, NULL );
+    OGRLayer *poLayer2;
+    poLayer2 = poDS2->CreateLayer( "out", NULL, wkbLineString, NULL );
+    OGRFieldDefn oField1("Value",OFTString);
+    oField1.SetWidth(32);
+    poLayer2->CreateField(&oField1);
+    for( auto& poFeature1: poLayer)
     {
-        cout<<"feature1"<<endl;
-//        cout<<poFeature1->GetGeometryRef()->exportToWkt()<<endl;
-//        String feature = poFeature1->GetGeometryRef()->exportToWkt();
+        cout<<"Value = "<<poFeature1->GetFieldAsString("Value")<<endl;
+        cout<<"String poniżej"<<endl;
+        string string1 = poFeature1->GetGeometryRef()->exportToJson();
+        cout<<poFeature1->GetGeometryRef()->exportToJson()<<endl;
+        json second = json::parse(string1);
+        OGRLineString ls;
+        OGRFeature *poFeature4;
+        poFeature4 = OGRFeature::CreateFeature(poLayer2->GetLayerDefn());
+        double temp_x = second["coordinates"][0][0];
+        double temp_y = second["coordinates"][0][1];
+        ls.addPoint(temp_x,temp_y);
+        for(int i=1;i<second["coordinates"].size();i++){
+            double temp2_x = second["coordinates"][i][0];
+            double temp2_y = second["coordinates"][i][1];
+            double mid_x = (temp_x + temp2_x)/2;
+            double mid_y = (temp_y + temp2_y)/2;
+            ls.addPoint((temp_x+mid_x)/2,(temp_y+mid_y)/2);
+            ls.addPoint((temp2_x+mid_x)/2,(temp2_y+mid_y)/2);
+            temp_x = temp2_x;
+            temp_y = temp2_y;
+            if(i==second["coordinates"].size()-1){
+                ls.addPoint(temp_x,temp_y);
+            }
+        }
+        poFeature4->SetGeometry(&ls);
+        poFeature4->SetField( "Value", poFeature1->GetFieldAsString("Value"));
+        cout<<"feature4"<<endl;
+        cout<<poFeature4->GetGeometryRef()->exportToJson()<<endl;
+        poLayer2->CreateFeature(poFeature4);
+        poLayer2->SetFeature(poFeature4);
+    }
+    for( auto& poFeature1: poLayer){
+        cout<<"wynik"<<poFeature1->GetGeometryRef()->exportToJson()<<endl;
     }
 
 
@@ -251,6 +278,7 @@ int main() {
 //    OGRFeature::DestroyFeature( poFeature1 );
 //    OGRFeature::DestroyFeature( poFeature2 );
     GDALClose( poDS );
+    GDALClose( poDS2 );
 
 
 
