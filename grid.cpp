@@ -1,27 +1,31 @@
-#include<iostream>
 #include <cmath>
 #include "grid.h"
-#include "cell.h"
+#include "structures.h"
 using namespace std;
 extern double cellsize;
-extern int minx;
-extern int miny;
+extern int x_length;
+extern int y_length;
 double R;
-extern std::vector<std::vector<Cell>> tab;
-extern std::vector<std::vector<LineCell>> arr;
+extern std::vector<std::vector<Cell>> cell_array;
+extern std::vector<std::vector<LineCell>> linecell_array;
 extern std::vector<Line> array_with_lines;
 extern double isoline_value;
 
-void Grid::generateGrid(liblas::Header header, liblas::Reader reader) {
-    for (int i = 0; i < minx; i++) {
-        for (int j = 0; j < miny; j++) {
-            tab[i][j].centerx = header.GetMinX() + (i * (cellsize)) + (cellsize / 2);
-            tab[i][j].centery = header.GetMaxY() - ((j * (cellsize)) + (cellsize / 2));
+void Grid::mainfunctions(liblas::Header header,liblas::Reader reader) {
+    generateGrid(header);
+    distance_beetween_points(header, reader);
+    inverse_distance_weighting_algorithm();
+    checkeveryvalue();
+    set_important_values_for_every_linecell(header);
+}
+
+void Grid::generateGrid(liblas::Header header) {
+    for (int i = 0; i < x_length; i++) {
+        for (int j = 0; j < y_length; j++) {
+            cell_array[i][j].centerx = header.GetMinX() + (i * (cellsize)) + (cellsize / 2);
+            cell_array[i][j].centery = header.GetMaxY() - ((j * (cellsize)) + (cellsize / 2));
         }
     }
-    distance_beetween_points(header, reader);
-    idw();
-    get_data_of_every_cell(header);
 }
 
 void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader) {
@@ -29,7 +33,6 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
     liblas::Point const &p = reader.GetPoint();
     int count = 0;
     while (reader.ReadNextPoint()) {
-
 //        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
 //            count++;
 //        } else {
@@ -42,20 +45,20 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
         }
         int x = floor((p.GetX() - header.GetMinX()) / cellsize);
         int y = floor((header.GetMaxY() - p.GetY()) / cellsize);
-        checkneighbours(x, y, p);
+        check_if_point_belongs_to_neighbours(x, y, p);
     }
 }
 
-void Grid::checkneighbours(int x, int y, liblas::Point p) {
+void Grid::check_if_point_belongs_to_neighbours(int x, int y, liblas::Point p) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
-            if (x - i > 0 && x - i < minx && y - j > 0 && y - j < miny) {
+            if (x - i > 0 && x - i < x_length && y - j > 0 && y - j < y_length) {
                 double result = sqrt(
-                        pow((tab[x - i][y - j].centerx) - p.GetX(), 2) +
-                        pow((tab[x - i][y - j].centery) - p.GetY(), 2));
+                        pow((cell_array[x - i][y - j].centerx) - p.GetX(), 2) +
+                        pow((cell_array[x - i][y - j].centery) - p.GetY(), 2));
                 if (result < R) {
                     PointsDistance temp_distance(p, result);
-                    tab[x - i][y - j].pointsdistance.push_back(temp_distance);
+                    cell_array[x - i][y - j].pointsdistance.push_back(temp_distance);
                 }
             }
         }
@@ -65,18 +68,18 @@ void Grid::checkneighbours(int x, int y, liblas::Point p) {
 double Grid::neighbours(int x, int y) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
-            if (x - i > 0 && x - i < minx && y - j > 0 && y - j < miny) {
-                if (tab[x - i][y - j].pointsdistance.size() > 0) {
-                    tab[x][y].value = tab[x - i][y - j].pointsdistance[0].point.GetZ();
-                    return tab[x][y].value;
+            if (x - i > 0 && x - i < x_length && y - j > 0 && y - j < y_length) {
+                if (cell_array[x - i][y - j].pointsdistance.size() > 0) {
+                    cell_array[x][y].value = cell_array[x - i][y - j].pointsdistance[0].point.GetZ();
+                    return cell_array[x][y].value;
                 }
             }
         }
     }
-    return tab[x][y].value = 77;
+    return cell_array[x][y].value = 77;
 }
 
-void line(Point point1, Point point2, double firstpoint,double secondpoint,int i,int j) {
+void generate_line(Point point1, Point point2, double firstpoint,double secondpoint,int i,int j) {
     if(floor(firstpoint/isoline_value) == ceil(secondpoint/isoline_value)){
         Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),i,j);
         array_with_lines.push_back(temp_line);
@@ -86,79 +89,79 @@ void line(Point point1, Point point2, double firstpoint,double secondpoint,int i
     }
 }
 
-void generateLines(int state, LineCell cell,int i,int j) {
+void recognize_type_of_line(int state, LineCell cell,int i,int j) {
     switch (state) {
         case 1:
-            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j);
+            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j);
             break;
         case 2:
-            line(cell.pointb, cell.pointc,cell.topleft,cell.bottomright,i,j);
+            generate_line(cell.pointb, cell.pointc,cell.topleft,cell.bottomright,i,j);
             break;
         case 3:
-            line(cell.pointb, cell.pointd,cell.topright,cell.bottomleft,i,j);
+            generate_line(cell.pointb, cell.pointd,cell.topright,cell.bottomleft,i,j);
             break;
         case 4:
-            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j);
+            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j);
             break;
         case 5:
-            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft,i,j);
-            line(cell.pointb, cell.pointc,cell.bottomright,cell.topright,i,j);
+            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft,i,j);
+            generate_line(cell.pointb, cell.pointc,cell.bottomright,cell.topright,i,j);
             break;
         case 6:
-            line(cell.pointa, cell.pointc,cell.topleft,cell.topright,i,j);
+            generate_line(cell.pointa, cell.pointc,cell.topleft,cell.topright,i,j);
             break;
         case 7:
-            line(cell.pointa, cell.pointd,cell.topleft,cell.topright,i,j);
+            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.topright,i,j);
             break;
         case 8:
-            line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright,i,j);
+            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright,i,j);
             break;
         case 9:
-            line(cell.pointa, cell.pointc,cell.topleft,cell.bottomright,i,j);
+            generate_line(cell.pointa, cell.pointc,cell.topleft,cell.bottomright,i,j);
             break;
         case 10:
-            line(cell.pointa, cell.pointb,cell.topright,cell.bottomright,i,j);
-            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topleft,i,j);
+            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomright,i,j);
+            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topleft,i,j);
             break;
         case 11:
-            line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j);
+            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j);
             break;
         case 12:
-            line(cell.pointb, cell.pointd,cell.topright,cell.bottomright,i,j);
+            generate_line(cell.pointb, cell.pointd,cell.topright,cell.bottomright,i,j);
             break;
 
         case 13:
-            line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft,i,j);
+            generate_line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft,i,j);
             break;
 
         case 14:
-            line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j);
+            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j);
             break;
     }
 }
 
-void single_cell_idw(int x,int y,vector<double>temp_array){
+void calculate_average_cell_value(int x,int y,vector<double>temp_array){
     double temp = 0;
     for(int i=0;i<temp_array.size();i++){
         temp += temp_array[i];
     }
     double result = temp/temp_array.size();
-    tab[x][y].value = result;
+    cell_array[x][y].value = result;
 }
 
-double neighboursv2(int x, int y){
+double get_cell_value_from_the_closest_cells_with_value(int x, int y){
     int i = 0;
     vector <double> temp_array;
     while(true){
         if(temp_array.size()>0){
-            single_cell_idw(x,y,temp_array);
+            calculate_average_cell_value(x,y,temp_array);
             break;
         }
         for(int j = -i; j<= i;j++){
             for(int k = -i; k<=i;k++){
-                if (x - j > 0 && x - j < minx && y - k > 0 && y - k < miny) {
-                    if (tab[x - j][y - k].pointsdistance.size() > 0) {
-                        temp_array.push_back(tab[x - j][y - k].value);
+                if (x - j > 0 && x - j < x_length && y - k > 0 && y - k < y_length) {
+                    if (cell_array[x - j][y - k].pointsdistance.size() > 0) {
+                        temp_array.push_back(cell_array[x - j][y - k].value);
                     }
                 }
             }
@@ -167,60 +170,41 @@ double neighboursv2(int x, int y){
     }
 }
 
-
-void checkeveryvalue(){
-    for (int i = 0; i < minx; i++) {
-        for (int j = 0; j < miny; j++) {
-            if(tab[i][j].value == 0){
-                neighboursv2(i,j);
+void Grid::checkeveryvalue(){
+    for (int i = 0; i < x_length; i++) {
+        for (int j = 0; j < y_length; j++) {
+            if(cell_array[i][j].value == 0){
+                get_cell_value_from_the_closest_cells_with_value(i,j);
             }
         }
     }
 }
-//void checkeveryvaluev2(){
-//    for (int i = 0; i < minx; i++) {
-//        for (int j = 0; j < miny; j++) {
-//            cout<<"koniec"<<tab[i][j].value<<endl;
-////            if(tab[i][j].value == 0){
-////                neighboursv2(i,j);
-////            }
-//        }
-//    }
-//}
-void checkarray(){
-    for(int i=0;i<array_with_lines.size();i++){
-        cout<<"linia "<<array_with_lines[i].value<<endl;
-    }
-}
 
-void Grid::idw() {
-    for (int i = 0; i < minx; i++) {
-        for (int j = 0; j < miny; j++) {
+void Grid::inverse_distance_weighting_algorithm() {
+    for (int i = 0; i < x_length; i++) {
+        for (int j = 0; j < y_length; j++) {
             double result = 0;
             double result1 = 0;
             double result2 = 0;
             double temp = 0;
-            int size = tab[i][j].pointsdistance.size();
+            int size = cell_array[i][j].pointsdistance.size();
             if (size > 0) {
                 for (int k = 0; k < size; k++) {
                     result1 =
-                            result1 + (tab[i][j].pointsdistance[k].point.GetZ() / tab[i][j].pointsdistance[k].distance);
-                    result2 = result2 + (1 / tab[i][j].pointsdistance[k].distance);
+                            result1 + (cell_array[i][j].pointsdistance[k].point.GetZ() / cell_array[i][j].pointsdistance[k].distance);
+                    result2 = result2 + (1 / cell_array[i][j].pointsdistance[k].distance);
 
-                    if (tab[i][j].pointsdistance[k].distance == 0) {
-                        temp = tab[i][j].pointsdistance[k].point.GetZ();
+                    if (cell_array[i][j].pointsdistance[k].distance == 0) {
+                        temp = cell_array[i][j].pointsdistance[k].point.GetZ();
                     }
                 }
                 result = result1 / result2;
 
                 if (temp != 0) {
-                    tab[i][j].value = temp;
+                    cell_array[i][j].value = temp;
                 } else {
-                    tab[i][j].value = result;
+                    cell_array[i][j].value = result;
                 }
-            } else {
-//                neighbours(i, j);
-//                neighboursv2(i,j);
             }
         }
     }
@@ -248,34 +232,33 @@ void checkValues(LineCell cell,int i,int j) {
         int bottomleft = ceil(botl / minvalue) - 1;
         int bottomright = ceil(botr / minvalue) - 1;
         int result = getState(topleft, topright, bottomright, bottomleft);
-        generateLines(result, cell, i,j);
+        recognize_type_of_line(result, cell, i,j);
     }
 }
 
-void Grid::get_data_of_every_cell(liblas::Header header) {
-    for (int i = 0; i < minx-1; i++) {
-        for (int j = 0; j < miny-1; j++) {
-            arr[i][j].topleft = tab[i][j].value;
-            arr[i][j].topright = tab[i+1][j].value;
-            arr[i][j].bottomleft = tab[i][j+1].value;
-            arr[i][j].bottomright = tab[i+1][j+1].value;
+void Grid::set_important_values_for_every_linecell(liblas::Header header) {
+    for (int i = 0; i < x_length-1; i++) {
+        for (int j = 0; j < y_length-1; j++) {
+            linecell_array[i][j].topleft = cell_array[i][j].value;
+            linecell_array[i][j].topright = cell_array[i+1][j].value;
+            linecell_array[i][j].bottomleft = cell_array[i][j+1].value;
+            linecell_array[i][j].bottomright = cell_array[i+1][j+1].value;
 
-            arr[i][j].pointa.x = header.GetMinX() + (i * (cellsize) + (cellsize));
-            arr[i][j].pointa.y = header.GetMaxY() - (j * (cellsize) + (cellsize/2));
+            linecell_array[i][j].pointa.x = header.GetMinX() + (i * (cellsize) + (cellsize));
+            linecell_array[i][j].pointa.y = header.GetMaxY() - (j * (cellsize) + (cellsize/2));
 
-            arr[i][j].pointb.x = header.GetMinX() + (i * (cellsize) + (cellsize+(cellsize/2)));
-            arr[i][j].pointb.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
+            linecell_array[i][j].pointb.x = header.GetMinX() + (i * (cellsize) + (cellsize+(cellsize/2)));
+            linecell_array[i][j].pointb.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
 
-            arr[i][j].pointc.x = header.GetMinX() + (i * (cellsize) + (cellsize));
-            arr[i][j].pointc.y = header.GetMaxY() - (j * (cellsize) + (cellsize+(cellsize/2)));
+            linecell_array[i][j].pointc.x = header.GetMinX() + (i * (cellsize) + (cellsize));
+            linecell_array[i][j].pointc.y = header.GetMaxY() - (j * (cellsize) + (cellsize+(cellsize/2)));
 
-            arr[i][j].pointd.x = header.GetMinX() + (i * (cellsize) + (cellsize/2));
-            arr[i][j].pointd.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
+            linecell_array[i][j].pointd.x = header.GetMinX() + (i * (cellsize) + (cellsize/2));
+            linecell_array[i][j].pointd.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
 
-            checkValues(arr[i][j],i,j);
+            checkValues(linecell_array[i][j],i,j);
         }
     }
-    checkarray();
 }
 
 

@@ -3,20 +3,19 @@
 #include<iostream>
 #include <liblas/liblas.hpp>
 #include <liblas/header.hpp>
-#include "cell.h"
+#include "structures.h"
 
 using namespace std;
 class Grid{
 public:
-    void generateGrid(liblas::Header,liblas::Reader);
+    void mainfunctions(liblas::Header,liblas::Reader);
+    void generateGrid(liblas::Header);
     void distance_beetween_points(liblas::Header,liblas::Reader);
-    void idw();
-//    void single_cell_idw();
-//    void generateLines(int result,Point a,Point b,Point c,Point d);
-    void get_data_of_every_cell(liblas::Header);
+    void inverse_distance_weighting_algorithm();
+    void set_important_values_for_every_linecell(liblas::Header);
     double neighbours(int x, int y);
-//    double neighboursv2(int x, int y);
-    void checkneighbours(int x,int y,liblas::Point);
+    void check_if_point_belongs_to_neighbours(int x,int y,liblas::Point);
+    void checkeveryvalue();
 
 };
 #endif

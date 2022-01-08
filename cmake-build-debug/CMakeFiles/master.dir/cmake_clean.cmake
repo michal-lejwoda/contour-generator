@@ -1,8 +1,7 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/master.dir/cell.cpp.o"
   "CMakeFiles/master.dir/grid.cpp.o"
-  "CMakeFiles/master.dir/idw.cpp.o"
   "CMakeFiles/master.dir/main.cpp.o"
+  "CMakeFiles/master.dir/unused.cpp.o"
   "master"
   "master.pdb"
 )

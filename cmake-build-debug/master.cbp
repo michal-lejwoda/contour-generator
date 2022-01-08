@@ -96,25 +96,19 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/saxatachi/CLionProjects/master/cell.cpp">
-			<Option target="master"/>
-		</Unit>
-		<Unit filename="/home/saxatachi/CLionProjects/master/cell.h">
-			<Option target="master"/>
-		</Unit>
 		<Unit filename="/home/saxatachi/CLionProjects/master/grid.cpp">
 			<Option target="master"/>
 		</Unit>
 		<Unit filename="/home/saxatachi/CLionProjects/master/grid.h">
 			<Option target="master"/>
 		</Unit>
-		<Unit filename="/home/saxatachi/CLionProjects/master/idw.cpp">
-			<Option target="master"/>
-		</Unit>
-		<Unit filename="/home/saxatachi/CLionProjects/master/idw.h">
-			<Option target="master"/>
-		</Unit>
 		<Unit filename="/home/saxatachi/CLionProjects/master/main.cpp">
+			<Option target="master"/>
+		</Unit>
+		<Unit filename="/home/saxatachi/CLionProjects/master/structures.h">
+			<Option target="master"/>
+		</Unit>
+		<Unit filename="/home/saxatachi/CLionProjects/master/unused.cpp">
 			<Option target="master"/>
 		</Unit>
 		<Unit filename="/home/saxatachi/CLionProjects/master/CMakeLists.txt">

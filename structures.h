@@ -1,5 +1,5 @@
-#ifndef MASTER_CELL_H
-#define MASTER_CELL_H
+#ifndef MASTER_STRUCTURES_H
+#define MASTER_STRUCTURES_H
 #include<iostream>
 #include <liblas/liblas.hpp>
 #include <liblas/header.hpp>
@@ -36,8 +36,6 @@ struct Cell {
     double centerx;
     double centery;
     vector<PointsDistance> pointsdistance;
-//    vector<liblas::Point> points;
-//    vector<double> distance;
     double value;
 };
 
@@ -53,4 +51,4 @@ struct LineCell {
 };
 
 
-#endif //MASTER_CELL_H
+#endif //MASTER_STRUCTURES_H
