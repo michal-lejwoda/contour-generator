@@ -1,6 +1,10 @@
 #include <cmath>
 #include "grid.h"
 #include "structures.h"
+#include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 using namespace std;
 extern double cellsize;
 extern int x_length;
@@ -20,18 +24,27 @@ void Grid::mainfunctions(liblas::Header header,liblas::Reader reader) {
 }
 
 void Grid::generateGrid(liblas::Header header) {
+    clock_t start = clock();
+    #pragma omp parallel
+    #pragma omp for
     for (int i = 0; i < x_length; i++) {
         for (int j = 0; j < y_length; j++) {
+//            cout<<omp_get_thread_num()<<endl;
             cell_array[i][j].centerx = header.GetMinX() + (i * (cellsize)) + (cellsize / 2);
             cell_array[i][j].centery = header.GetMaxY() - ((j * (cellsize)) + (cellsize / 2));
         }
     }
+
+    clock_t end = clock();
+    double elapsed = double(end - start)/CLOCKS_PER_SEC;
+    cout<<"elapsed"<<elapsed<<endl;
 }
 
 void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader) {
     R = (cellsize * sqrt(2)) / 2;
     liblas::Point const &p = reader.GetPoint();
     int count = 0;
+    clock_t start = clock();
     while (reader.ReadNextPoint()) {
 //        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
 //            count++;
@@ -47,9 +60,14 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
         int y = floor((header.GetMaxY() - p.GetY()) / cellsize);
         check_if_point_belongs_to_neighbours(x, y, p);
     }
+    clock_t end = clock();
+    double elapsed = double(end - start)/CLOCKS_PER_SEC;
+    cout<<"elapsed while"<<elapsed<<endl;
 }
 
 void Grid::check_if_point_belongs_to_neighbours(int x, int y, liblas::Point p) {
+    #pragma omp parallel
+    #pragma omp for
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             if (x - i > 0 && x - i < x_length && y - j > 0 && y - j < y_length) {
@@ -157,6 +175,8 @@ double get_cell_value_from_the_closest_cells_with_value(int x, int y){
             calculate_average_cell_value(x,y,temp_array);
             break;
         }
+        #pragma omp parallel
+        #pragma omp for
         for(int j = -i; j<= i;j++){
             for(int k = -i; k<=i;k++){
                 if (x - j > 0 && x - j < x_length && y - k > 0 && y - k < y_length) {
@@ -171,6 +191,8 @@ double get_cell_value_from_the_closest_cells_with_value(int x, int y){
 }
 
 void Grid::checkeveryvalue(){
+    #pragma omp parallel
+    #pragma omp for
     for (int i = 0; i < x_length; i++) {
         for (int j = 0; j < y_length; j++) {
             if(cell_array[i][j].value == 0){
@@ -181,6 +203,8 @@ void Grid::checkeveryvalue(){
 }
 
 void Grid::inverse_distance_weighting_algorithm() {
+    #pragma omp parallel
+    #pragma omp for
     for (int i = 0; i < x_length; i++) {
         for (int j = 0; j < y_length; j++) {
             double result = 0;
