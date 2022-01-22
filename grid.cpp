@@ -16,28 +16,35 @@ extern std::vector<Line> array_with_lines;
 extern double isoline_value;
 
 void Grid::mainfunctions(liblas::Header header,liblas::Reader reader) {
+    double start = omp_get_wtime();
     generateGrid(header);
     distance_beetween_points(header, reader);
     inverse_distance_weighting_algorithm();
     checkeveryvalue();
     set_important_values_for_every_linecell(header);
+    double end = omp_get_wtime();
+    double elapsed = end - start;
+    cout<<"elapsed main functions"<<elapsed<<endl;
 }
 
 void Grid::generateGrid(liblas::Header header) {
-    clock_t start = clock();
-    #pragma omp parallel
-    #pragma omp for
-    for (int i = 0; i < x_length; i++) {
-        for (int j = 0; j < y_length; j++) {
-//            cout<<omp_get_thread_num()<<endl;
-            cell_array[i][j].centerx = header.GetMinX() + (i * (cellsize)) + (cellsize / 2);
-            cell_array[i][j].centery = header.GetMaxY() - ((j * (cellsize)) + (cellsize / 2));
-        }
-    }
+    double minx = header.GetMinX();
+    double maxy = header.GetMaxY();
+    double start = omp_get_wtime();
+    #pragma omp parallel num_threads(12)
+    {
 
-    clock_t end = clock();
-    double elapsed = double(end - start)/CLOCKS_PER_SEC;
-    cout<<"elapsed"<<elapsed<<endl;
+#pragma omp for schedule(static)
+        for (int i = 0; i < x_length; i++) {
+            for (int j = 0; j < y_length; j++) {
+                cell_array[i][j].centerx = minx + (i * (cellsize)) + (cellsize / 2);
+                cell_array[i][j].centery = maxy - ((j * (cellsize)) + (cellsize / 2));
+            }
+        }
+    };
+    double end = omp_get_wtime();
+    double elapsed = end - start;
+    cout<<"elapsed generate grid = "<<elapsed<<endl;
 }
 
 void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader) {
@@ -45,6 +52,7 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
     liblas::Point const &p = reader.GetPoint();
     int count = 0;
     clock_t start = clock();
+
     while (reader.ReadNextPoint()) {
 //        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
 //            count++;
@@ -62,12 +70,10 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
     }
     clock_t end = clock();
     double elapsed = double(end - start)/CLOCKS_PER_SEC;
-    cout<<"elapsed while"<<elapsed<<endl;
+    cout<<"elapsed distance_beetween_points = "<<elapsed<<endl;
 }
 
 void Grid::check_if_point_belongs_to_neighbours(int x, int y, liblas::Point p) {
-    #pragma omp parallel
-    #pragma omp for
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             if (x - i > 0 && x - i < x_length && y - j > 0 && y - j < y_length) {
@@ -97,63 +103,63 @@ double Grid::neighbours(int x, int y) {
     return cell_array[x][y].value = 77;
 }
 
-void generate_line(Point point1, Point point2, double firstpoint,double secondpoint,int i,int j) {
+void generate_line(Point point1, Point point2, double firstpoint,double secondpoint,int i,int j,std::vector<Line> array_with_lines1) {
     if(floor(firstpoint/isoline_value) == ceil(secondpoint/isoline_value)){
         Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),i,j);
-        array_with_lines.push_back(temp_line);
+        array_with_lines1.push_back(temp_line);
     }else if(floor(secondpoint/isoline_value) == ceil(firstpoint/isoline_value)){
         Line temp_line = Line(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),i,j);
-        array_with_lines.push_back(temp_line);
+        array_with_lines1.push_back(temp_line);
     }
 }
 
-void recognize_type_of_line(int state, LineCell cell,int i,int j) {
+void recognize_type_of_line(int state, LineCell cell,int i,int j,std::vector<Line> array_with_lines1) {
     switch (state) {
         case 1:
-            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j);
+            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j,array_with_lines1);
             break;
         case 2:
-            generate_line(cell.pointb, cell.pointc,cell.topleft,cell.bottomright,i,j);
+            generate_line(cell.pointb, cell.pointc,cell.topleft,cell.bottomright,i,j,array_with_lines1);
             break;
         case 3:
-            generate_line(cell.pointb, cell.pointd,cell.topright,cell.bottomleft,i,j);
+            generate_line(cell.pointb, cell.pointd,cell.topright,cell.bottomleft,i,j,array_with_lines1);
             break;
         case 4:
-            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j);
+            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j,array_with_lines1);
             break;
         case 5:
-            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft,i,j);
-            generate_line(cell.pointb, cell.pointc,cell.bottomright,cell.topright,i,j);
+            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft,i,j,array_with_lines1);
+            generate_line(cell.pointb, cell.pointc,cell.bottomright,cell.topright,i,j,array_with_lines1);
             break;
         case 6:
-            generate_line(cell.pointa, cell.pointc,cell.topleft,cell.topright,i,j);
+            generate_line(cell.pointa, cell.pointc,cell.topleft,cell.topright,i,j,array_with_lines1);
             break;
         case 7:
-            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.topright,i,j);
+            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.topright,i,j,array_with_lines1);
             break;
         case 8:
-            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright,i,j);
+            generate_line(cell.pointa, cell.pointd,cell.topleft,cell.bottomright,i,j,array_with_lines1);
             break;
         case 9:
-            generate_line(cell.pointa, cell.pointc,cell.topleft,cell.bottomright,i,j);
+            generate_line(cell.pointa, cell.pointc,cell.topleft,cell.bottomright,i,j,array_with_lines1);
             break;
         case 10:
-            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomright,i,j);
-            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topleft,i,j);
+            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomright,i,j,array_with_lines1);
+            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topleft,i,j,array_with_lines1);
             break;
         case 11:
-            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j);
+            generate_line(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j,array_with_lines1);
             break;
         case 12:
-            generate_line(cell.pointb, cell.pointd,cell.topright,cell.bottomright,i,j);
+            generate_line(cell.pointb, cell.pointd,cell.topright,cell.bottomright,i,j,array_with_lines1);
             break;
 
         case 13:
-            generate_line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft,i,j);
+            generate_line(cell.pointb, cell.pointc,cell.bottomright,cell.topleft,i,j,array_with_lines1);
             break;
 
         case 14:
-            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j);
+            generate_line(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j,array_with_lines1);
             break;
     }
 }
@@ -175,8 +181,8 @@ double get_cell_value_from_the_closest_cells_with_value(int x, int y){
             calculate_average_cell_value(x,y,temp_array);
             break;
         }
-        #pragma omp parallel
-        #pragma omp for
+//        #pragma omp parallel
+//        #pragma omp for
         for(int j = -i; j<= i;j++){
             for(int k = -i; k<=i;k++){
                 if (x - j > 0 && x - j < x_length && y - k > 0 && y - k < y_length) {
@@ -191,8 +197,9 @@ double get_cell_value_from_the_closest_cells_with_value(int x, int y){
 }
 
 void Grid::checkeveryvalue(){
+    double start = omp_get_wtime();
     #pragma omp parallel
-    #pragma omp for
+    #pragma omp for schedule(dynamic)
     for (int i = 0; i < x_length; i++) {
         for (int j = 0; j < y_length; j++) {
             if(cell_array[i][j].value == 0){
@@ -200,11 +207,15 @@ void Grid::checkeveryvalue(){
             }
         }
     }
+    double end = omp_get_wtime();
+    double elapsed = end - start;
+    cout<<"elapsed check every value "<<elapsed<<endl;
 }
 
 void Grid::inverse_distance_weighting_algorithm() {
+    double start = omp_get_wtime();
     #pragma omp parallel
-    #pragma omp for
+    #pragma omp for schedule(static)
     for (int i = 0; i < x_length; i++) {
         for (int j = 0; j < y_length; j++) {
             double result = 0;
@@ -232,7 +243,10 @@ void Grid::inverse_distance_weighting_algorithm() {
             }
         }
     }
-    checkeveryvalue();
+    double end = omp_get_wtime();
+    double elapsed = end - start;
+    cout<<"elapsed idw "<<elapsed<<endl;
+//    checkeveryvalue();
 }
 
 int findMin(int a, int b, int c, int d) {
@@ -243,7 +257,7 @@ int getState(int a, int b, int c, int d) {
     return a * 8 + b * 4 + c * 2 + d * 1;
 }
 
-void checkValues(LineCell cell,int i,int j) {
+void checkValues(LineCell cell,int i,int j,std::vector<Line> array_with_lines1) {
     double topl = floor(cell.topleft / isoline_value);
     double topr = floor(cell.topright / isoline_value);
     double botl = floor(cell.bottomleft / isoline_value);
@@ -256,33 +270,49 @@ void checkValues(LineCell cell,int i,int j) {
         int bottomleft = ceil(botl / minvalue) - 1;
         int bottomright = ceil(botr / minvalue) - 1;
         int result = getState(topleft, topright, bottomright, bottomleft);
-        recognize_type_of_line(result, cell, i,j);
+        recognize_type_of_line(result, cell, i,j,array_with_lines1);
     }
 }
 
 void Grid::set_important_values_for_every_linecell(liblas::Header header) {
-    for (int i = 0; i < x_length-1; i++) {
-        for (int j = 0; j < y_length-1; j++) {
+    std::vector<Line> array_with_lines1;
+    double start = omp_get_wtime();
+#pragma omp parallel private (array_with_lines1)
+    {
+#pragma omp for schedule(static)
+    for (int i = 0; i < x_length - 1; i++) {
+        for (int j = 0; j < y_length - 1; j++) {
             linecell_array[i][j].topleft = cell_array[i][j].value;
-            linecell_array[i][j].topright = cell_array[i+1][j].value;
-            linecell_array[i][j].bottomleft = cell_array[i][j+1].value;
-            linecell_array[i][j].bottomright = cell_array[i+1][j+1].value;
+            linecell_array[i][j].topright = cell_array[i + 1][j].value;
+            linecell_array[i][j].bottomleft = cell_array[i][j + 1].value;
+            linecell_array[i][j].bottomright = cell_array[i + 1][j + 1].value;
 
             linecell_array[i][j].pointa.x = header.GetMinX() + (i * (cellsize) + (cellsize));
-            linecell_array[i][j].pointa.y = header.GetMaxY() - (j * (cellsize) + (cellsize/2));
+            linecell_array[i][j].pointa.y = header.GetMaxY() - (j * (cellsize) + (cellsize / 2));
 
-            linecell_array[i][j].pointb.x = header.GetMinX() + (i * (cellsize) + (cellsize+(cellsize/2)));
+            linecell_array[i][j].pointb.x = header.GetMinX() + (i * (cellsize) + (cellsize + (cellsize / 2)));
             linecell_array[i][j].pointb.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
 
             linecell_array[i][j].pointc.x = header.GetMinX() + (i * (cellsize) + (cellsize));
-            linecell_array[i][j].pointc.y = header.GetMaxY() - (j * (cellsize) + (cellsize+(cellsize/2)));
+            linecell_array[i][j].pointc.y = header.GetMaxY() - (j * (cellsize) + (cellsize + (cellsize / 2)));
 
-            linecell_array[i][j].pointd.x = header.GetMinX() + (i * (cellsize) + (cellsize/2));
+            linecell_array[i][j].pointd.x = header.GetMinX() + (i * (cellsize) + (cellsize / 2));
             linecell_array[i][j].pointd.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
 
-            checkValues(linecell_array[i][j],i,j);
+            checkValues(linecell_array[i][j], i, j, array_with_lines1);
         }
     }
+//#pragma omp critical
+//{
+//        for(int k=0; k<array_with_lines1.size();k++){
+//            cout<<"element = "<<array_with_lines1[k]<<endl;
+//            array_with_lines.push_back(array_with_lines1[k]);
+//        }
+//    };
+}
+    clock_t end = clock();
+    double elapsed = double(end - start)/CLOCKS_PER_SEC;
+    cout<<"elapsed set_important_values_for_every_linecell = "<<elapsed<<endl;
 }
 
 
