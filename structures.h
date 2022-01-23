@@ -32,6 +32,16 @@ struct Line{
     int j;
     Line(Point point1_,Point point2_,double value_,int i_,int j_):point1(point1_), point2(point2_), value(value_),i(i_),j(j_) {}
 };
+
+struct Linev2{
+    Point point1;
+    Point point2;
+    double value;
+    string pt1;
+    string pt2;
+    Linev2(Point point1_,Point point2_,double value_,string pt1_,string pt2_):point1(point1_), point2(point2_), value(value_), pt1(pt1_),pt2(pt2_) {}
+};
+
 struct Cell {
     double centerx;
     double centery;
@@ -48,6 +58,7 @@ struct LineCell {
     Point pointb;
     Point pointc;
     Point pointd;
+    vector<Linev2> lines;
 };
 
 

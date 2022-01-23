@@ -113,6 +113,18 @@ void generate_line(Point point1, Point point2, double firstpoint,double secondpo
     }
 }
 
+void generate_line_v2(Point point1, Point point2, double firstpoint,double secondpoint,int i,int j,string pt1,string pt2){
+    if(floor(firstpoint/isoline_value) == ceil(secondpoint/isoline_value)){
+        Linev2 temp_line = Linev2(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),pt1,pt2);
+        linecell_array[i][j].lines.push_back(temp_line);
+//        array_with_lines1.push_back(temp_line);
+    }else if(floor(secondpoint/isoline_value) == ceil(firstpoint/isoline_value)){
+        Linev2 temp_line = Linev2(point1, point2,(floor(firstpoint/isoline_value)*isoline_value),pt1,pt2);
+//        array_with_lines1.push_back(temp_line);
+        linecell_array[i][j].lines.push_back(temp_line);
+    }
+}
+
 void recognize_type_of_line(int state, LineCell cell,int i,int j,std::vector<Line> array_with_lines1) {
     switch (state) {
         case 1:
@@ -164,6 +176,58 @@ void recognize_type_of_line(int state, LineCell cell,int i,int j,std::vector<Lin
     }
 }
 
+void recognize_type_of_linev2(int state, LineCell cell,int i,int j){
+    switch (state) {
+        case 1:
+            generate_line_v2(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j,"c","d");
+            break;
+        case 2:
+            generate_line_v2(cell.pointb, cell.pointc,cell.topleft,cell.bottomright,i,j,"b","c");
+            break;
+        case 3:
+            generate_line_v2(cell.pointb, cell.pointd,cell.topright,cell.bottomleft,i,j,"b","d");
+            break;
+        case 4:
+            generate_line_v2(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j,"a","b");
+            break;
+        case 5:
+            generate_line_v2(cell.pointa, cell.pointd,cell.topleft,cell.bottomleft,i,j,"a","d");
+            generate_line_v2(cell.pointb, cell.pointc,cell.bottomright,cell.topright,i,j,"b","c");
+            break;
+        case 6:
+            generate_line_v2(cell.pointa, cell.pointc,cell.topleft,cell.topright,i,j,"a","c");
+            break;
+        case 7:
+            generate_line_v2(cell.pointa, cell.pointd,cell.topleft,cell.topright,i,j,"a","d");
+            break;
+        case 8:
+            generate_line_v2(cell.pointa, cell.pointd,cell.topleft,cell.bottomright,i,j,"a","d");
+            break;
+        case 9:
+            generate_line_v2(cell.pointa, cell.pointc,cell.topleft,cell.bottomright,i,j,"a","c");
+            break;
+        case 10:
+            generate_line_v2(cell.pointa, cell.pointb,cell.topright,cell.bottomright,i,j,"a","b");
+            generate_line_v2(cell.pointc, cell.pointd,cell.bottomleft,cell.topleft,i,j,"c","d");
+            break;
+        case 11:
+            generate_line_v2(cell.pointa, cell.pointb,cell.topright,cell.bottomleft,i,j,"a","b");
+            break;
+        case 12:
+            generate_line_v2(cell.pointb, cell.pointd,cell.topright,cell.bottomright,i,j,"b","d");
+            break;
+
+        case 13:
+            generate_line_v2(cell.pointb, cell.pointc,cell.bottomright,cell.topleft,i,j,"b","c");
+            break;
+
+        case 14:
+            generate_line_v2(cell.pointc, cell.pointd,cell.bottomleft,cell.topright,i,j,"c","d");
+            break;
+    }
+}
+
+
 void calculate_average_cell_value(int x,int y,vector<double>temp_array){
     double temp = 0;
     for(int i=0;i<temp_array.size();i++){
@@ -198,8 +262,8 @@ double get_cell_value_from_the_closest_cells_with_value(int x, int y){
 
 void Grid::checkeveryvalue(){
     double start = omp_get_wtime();
-    #pragma omp parallel
-    #pragma omp for schedule(dynamic)
+//    #pragma omp parallel
+//    #pragma omp for schedule(dynamic)
     for (int i = 0; i < x_length; i++) {
         for (int j = 0; j < y_length; j++) {
             if(cell_array[i][j].value == 0){
@@ -274,12 +338,110 @@ void checkValues(LineCell cell,int i,int j,std::vector<Line> array_with_lines1) 
     }
 }
 
+void checkValuesv2(LineCell cell,int i,int j){
+    double topl = floor(cell.topleft / isoline_value);
+    double topr = floor(cell.topright / isoline_value);
+    double botl = floor(cell.bottomleft / isoline_value);
+    double botr = floor(cell.bottomright / isoline_value);
+    if (topl == topr && topr == botl && botl == botr) { ;
+    } else {
+        int minvalue = findMin(topl, topr, botl, botr);
+        int topleft = ceil(topl / minvalue) - 1;
+        int topright = ceil(topr / minvalue) - 1;
+        int bottomleft = ceil(botl / minvalue) - 1;
+        int bottomright = ceil(botr / minvalue) - 1;
+        int result = getState(topleft, topright, bottomright, bottomleft);
+        recognize_type_of_linev2(result, cell,i,j);
+    }
+}
+
+void check_how_it_looks(){
+
+    cout<<x_length<<endl;
+    cout<<y_length<<endl;
+    for (int i = 0; i < x_length - 1; i++) {
+        for (int j = 0; j < y_length - 1; j++) {
+//            std::vector<Line> temp_array_with_lines;
+//            int count;
+//            int temp_i = i;
+//            int temp_j = j;
+//            while (true) {
+                if (linecell_array[temp_i][temp_j].lines.size() > 0) {
+                    for (int k = 0; k < linecell_array[i][j].lines.size(); k++) {
+                        if (i - 1 >= 0 &&
+                            (linecell_array[i][j].lines[k].pt1 == "d" || linecell_array[i][j].lines[k].pt2 == "d")) {
+                            for (int l = 0; l < linecell_array[i - 1][j].lines.size(); l++) {
+                                if (linecell_array[i - 1][j].lines[l].pt1 == "b") {
+                                    cout << "z lewej jeden" << endl;
+                                    cout << linecell_array[i - 1][j].lines[l].pt1 << " "
+                                         << linecell_array[i - 1][j].lines[l].pt2 << endl;
+                                }
+                                if (linecell_array[i - 1][j].lines[l].pt2 == "b") {
+                                    cout << "z lewej dwa" << endl;
+                                    cout << linecell_array[i - 1][j].lines[l].pt1 << " "
+                                         << linecell_array[i - 1][j].lines[l].pt2 << endl;
+                                }
+                            }
+                        }
+                        if (j + 1 < y_length - 1 &&
+                            (linecell_array[i][j].lines[k].pt1 == "a" || linecell_array[i][j].lines[k].pt2 == "a")) {
+                            for (int l = 0; l < linecell_array[i][j + 1].lines.size(); l++) {
+                                if (linecell_array[i][j + 1].lines[l].pt1 == "c") {
+                                    cout << "z góry jeden" << endl;
+                                    cout << linecell_array[i][j + 1].lines[l].pt1 << " "
+                                         << linecell_array[i][j + 1].lines[l].pt2 << endl;
+                                }
+                                if (linecell_array[i][j + 1].lines[l].pt2 == "c") {
+                                    cout << "z góry dwa" << endl;
+                                    cout << linecell_array[i][j + 1].lines[l].pt1 << " "
+                                         << linecell_array[i][j + 1].lines[l].pt2 << endl;
+                                }
+                            }
+                        }
+                        if (i + 1 < x_length - 1 &&
+                            (linecell_array[i][j].lines[k].pt1 == "b" || linecell_array[i][j].lines[k].pt2 == "b")) {
+                            for (int l = 0; l < linecell_array[i + 1][j].lines.size(); l++) {
+                                if (linecell_array[i + 1][j].lines[l].pt1 == "d") {
+                                    cout << "z prawej jeden" << endl;
+                                    cout << linecell_array[i + 1][j].lines[l].pt1 << " "
+                                         << linecell_array[i + 1][j].lines[l].pt2 << endl;
+                                }
+                                if (linecell_array[i + 1][j].lines[l].pt2 == "d") {
+                                    cout << "z prawej dwa" << endl;
+                                    cout << linecell_array[i + 1][j].lines[l].pt1 << " "
+                                         << linecell_array[i + 1][j].lines[l].pt2 << endl;
+                                }
+                            }
+                        }
+                        if (j - 1 >= 0 &&
+                            (linecell_array[i][j].lines[k].pt1 == "c" || linecell_array[i][j].lines[k].pt2 == "c")) {
+                            for (int l = 0; l < linecell_array[i][j - 1].lines.size(); l++) {
+                                if (linecell_array[i][j - 1].lines[l].pt1 == "d") {
+                                    cout << "z dołu jeden" << endl;
+                                    cout << linecell_array[i][j - 1].lines[l].pt1 << " "
+                                         << linecell_array[i][j - 1].lines[l].pt2 << endl;
+                                }
+                                if (linecell_array[i][j - 1].lines[l].pt2 == "d") {
+                                    cout << "z dołu dwa" << endl;
+                                    cout << linecell_array[i][j - 1].lines[l].pt1 << " "
+                                         << linecell_array[i][j - 1].lines[l].pt2 << endl;
+                                }
+                            }
+                        }
+                    }
+                }
+//        }
+        }
+    }
+}
+
+
 void Grid::set_important_values_for_every_linecell(liblas::Header header) {
     std::vector<Line> array_with_lines1;
     double start = omp_get_wtime();
-#pragma omp parallel private (array_with_lines1)
-    {
-#pragma omp for schedule(static)
+//#pragma omp parallel private (array_with_lines1)
+//    {
+//#pragma omp for schedule(static)
     for (int i = 0; i < x_length - 1; i++) {
         for (int j = 0; j < y_length - 1; j++) {
             linecell_array[i][j].topleft = cell_array[i][j].value;
@@ -299,9 +461,11 @@ void Grid::set_important_values_for_every_linecell(liblas::Header header) {
             linecell_array[i][j].pointd.x = header.GetMinX() + (i * (cellsize) + (cellsize / 2));
             linecell_array[i][j].pointd.y = header.GetMaxY() - (j * (cellsize) + (cellsize));
 
-            checkValues(linecell_array[i][j], i, j, array_with_lines1);
+//            checkValues(linecell_array[i][j], i, j, array_with_lines1);
+            checkValuesv2(linecell_array[i][j],i,j);
         }
     }
+    check_how_it_looks();
 //#pragma omp critical
 //{
 //        for(int k=0; k<array_with_lines1.size();k++){
@@ -309,7 +473,7 @@ void Grid::set_important_values_for_every_linecell(liblas::Header header) {
 //            array_with_lines.push_back(array_with_lines1[k]);
 //        }
 //    };
-}
+//}
     clock_t end = clock();
     double elapsed = double(end - start)/CLOCKS_PER_SEC;
     cout<<"elapsed set_important_values_for_every_linecell = "<<elapsed<<endl;
