@@ -22,7 +22,16 @@ int y_length;
 std::vector<std::vector<Cell>> cell_array;
 std::vector<std::vector<LineCell>> linecell_array;
 std::vector<Line> array_with_lines;
+std::vector<Linev2> temp_array_with_lines;
+GDALDataset *poDStest;
 double isoline_value = 2;
+const char *pszDriverNametest = "ESRI Shapefile";
+GDALDriver *poDrivertest;
+//poDrivertest = GetGDALDriverManager()->GetDriverByName(pszDriverNametest);
+//poDStest = poDrivertest->Create("/home/saxatachi/Desktop/testjednejlinii12.shp", 0, 0, 0, GDT_Unknown, NULL);
+OGRLayer *poLayertest;
+//poLayertest = poDStest->CreateLayer("line_out", NULL,
+//                                    double isoline_value = 2;
 
 //int dominant_value(std::vector<Line> temp_array) {
 //    std::vector<double> allvalues;
@@ -64,8 +73,29 @@ int main() {
     cell_array = vector<vector<Cell>>(x_length, vector<Cell>(y_length));
     linecell_array = vector<vector<LineCell>>(x_length - 1, vector<LineCell>(y_length - 1));
 
+
+//    GDALDataset *poDStest;
+    const char *pszDriverNametest = "ESRI Shapefile";
+//    GDALDriver *poDrivertest;
+    poDrivertest = GetGDALDriverManager()->GetDriverByName(pszDriverNametest);
+    poDStest = poDrivertest->Create("/home/saxatachi/Desktop/testjednejlinii13.shp", 0, 0, 0, GDT_Unknown, NULL);
+//    OGRLayer *poLayertest;
+    poLayertest = poDStest->CreateLayer("line_jeden", NULL, wkbLineString, NULL);
+    OGRFieldDefn oFieldtest("Value", OFTString);
+    oFieldtest.SetWidth(32);
+    poLayertest->CreateField(&oFieldtest);
     Grid grid;
     grid.mainfunctions(header, reader);
+    GDALClose(poDStest);
+    cout<<"test"<<endl;
+//    OGRLineString ls;
+//    OGRFeature *poFeature3;
+//    poFeature3 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+//    poFeature3->SetField("Value", temp_array_with_lines[0].value);
+//    for (int i = 0; i < temp_array_with_lines.size(); i++) {
+//        ls.addPoint(temp_array_with_lines[i].point1.x, temp_array_with_lines[i].point1.y);
+//        ls.addPoint(temp_array_with_lines[i].point2.x, temp_array_with_lines[i].point2.y);
+//    }
 
 
     GDALDataset *poDS1;
@@ -208,6 +238,7 @@ int main() {
 //    }
     GDALClose(poDS);
     GDALClose(poDS2);
+
     return 0;
 
 }
