@@ -20,7 +20,24 @@ extern std::vector<Line> array_with_lines;
 extern double isoline_value;
 extern std::vector<Linev2> temp_array_with_lines;
 extern OGRLayer *poLayertest;
+int ct2 = 0;
+int pop = 0;
+int ct3 = 0;
 
+//void tets(){
+//    std::vector<int> test_array;
+//    test_array.push_back(2);
+//    test_array.push_back(3);
+//    test_array.push_back(43);
+//    test_array.push_back(52);
+//    test_array.push_back(54);
+//    test_array.erase(test_array.begin() + 3);
+//    for(int i=0;i<test_array.size();i++){
+//        cout<<"i "<<i<<endl;
+//        cout<<"test_array "<<test_array[i]<<endl;
+//    }
+//
+//}
 
 void Grid::mainfunctions(liblas::Header header, liblas::Reader reader) {
     double start = omp_get_wtime();
@@ -29,6 +46,9 @@ void Grid::mainfunctions(liblas::Header header, liblas::Reader reader) {
     inverse_distance_weighting_algorithm();
     checkeveryvalue();
     set_important_values_for_every_linecell(header);
+//    tets();
+    cout<<"ctt2 : "<<ct2<<endl;
+    cout<<"pop : "<<pop<<endl;
     double end = omp_get_wtime();
     double elapsed = end - start;
     cout << "elapsed main functions" << elapsed << endl;
@@ -123,14 +143,17 @@ void generate_line(Point point1, Point point2, double firstpoint, double secondp
 
 void generate_line_v2(Point point1, Point point2, double firstpoint, double secondpoint, int i, int j, string pt1,
                       string pt2) {
+
     if (floor(firstpoint / isoline_value) == ceil(secondpoint / isoline_value)) {
         Linev2 temp_line = Linev2(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), pt1, pt2);
         linecell_array[i][j].lines.push_back(temp_line);
+        ct2++;
 //        array_with_lines1.push_back(temp_line);
     } else if (floor(secondpoint / isoline_value) == ceil(firstpoint / isoline_value)) {
         Linev2 temp_line = Linev2(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), pt1, pt2);
 //        array_with_lines1.push_back(temp_line);
         linecell_array[i][j].lines.push_back(temp_line);
+        ct2++;
     }
 }
 
@@ -366,99 +389,117 @@ void checkValuesv2(LineCell cell, int i, int j) {
 }
 
 void check(int i,int j){
+
     cout<<"i "<<i<<" j "<<j<<endl;
+
+//    cout<<linecell_array[i][j].lines.size()<<endl;
+//    for(int o =0;o<linecell_array[i][j].lines.size();o++){
+//        cout<<linecell_array[i][j].lines[o].pt1<<" "<<linecell_array[i][j].lines[o].pt2<<endl;
+//    }
+
 //    temp_array_with_lines.push_back(linecell_array[i][j].lines[0]);
-    if(j-1>=0  && (linecell_array[i][j].lines[0].pt1 == "a" || linecell_array[i][j].lines[0].pt2 == "a")) {
-            for (int k = 0; k < linecell_array[i][j - 1].lines.size(); k++) {
-                if (linecell_array[i][j - 1].lines[k].pt1 == "c" ||
-                    linecell_array[i][j - 1].lines[k].pt2 == "c") {
-//                    cout << "Działa powinno być a" << endl;
-                    if(linecell_array[i][j - 1].lines[k].pt1 == "c"){
-                        temp_array_with_lines.push_back(linecell_array[i][j-1].lines[k]);
-                    }else{
-                        Point temp1;
-                        temp1 = linecell_array[i][j-1].lines[k].point1;
-                        linecell_array[i][j-1].lines[k].point1 = linecell_array[i][j-1].lines[k].point2;
-                        linecell_array[i][j-1].lines[k].point2 = temp1;
-                        temp_array_with_lines.push_back(linecell_array[i][j-1].lines[k]);
-                    }
-                    if(linecell_array[i][j].lines.size()>0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
-                    }
-                    if(j-1>0) {
-                        return check(i, j - 1);
-                    }
+for(int z=0; z<linecell_array[i][j].lines.size();z++) {
+    cout<<"Podstawa Tu znajduje sie "<<linecell_array[i][j].lines[z].pt1<<" "<<linecell_array[i][j].lines[z].pt2<<endl;
+    //    cout<<linecell_array[i][j].lines[z].pt1<<" "<<linecell_array[i][j].lines[z].pt2<<endl;
+    if (j - 1 >= 0 && (linecell_array[i][j].lines[z].pt1 == "a" || linecell_array[i][j].lines[z].pt2 == "a")) {
+        for (int k = 0; k < linecell_array[i][j - 1].lines.size(); k++) {
+            if (linecell_array[i][j - 1].lines[k].pt1 == "c" ||
+                linecell_array[i][j - 1].lines[k].pt2 == "c") {
+                cout<<"Sprawdzenie ac co tu jest "<<linecell_array[i][j].lines[z].pt1<<" "<<linecell_array[i][j].lines[z].pt2<<endl;
+                cout<<"Przeszło ac"<<endl;
+                cout<<linecell_array[i][j - 1].lines[k].pt1<<" "<<linecell_array[i][j - 1].lines[k].pt2<<endl;
+                if (linecell_array[i][j - 1].lines[k].pt1 == "c") {
+                    temp_array_with_lines.push_back(linecell_array[i][j - 1].lines[k]);
+                } else {
+                    Point temp1;
+                    temp1 = linecell_array[i][j - 1].lines[k].point1;
+                    linecell_array[i][j - 1].lines[k].point1 = linecell_array[i][j - 1].lines[k].point2;
+                    linecell_array[i][j - 1].lines[k].point2 = temp1;
+                    temp_array_with_lines.push_back(linecell_array[i][j - 1].lines[k]);
+                }
+                if (linecell_array[i][j].lines.size() > 0) {
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
+                }
+                if (j - 1 > 0) {
+                    return check(i, j - 1);
                 }
             }
-    }
-    if(i+1<x_length-1 && (linecell_array[i][j].lines[0].pt1 == "b" || linecell_array[i][j].lines[0].pt2 == "b")) {
-            for (int k = 0; k < linecell_array[i + 1][j].lines.size(); k++) {
-                if (linecell_array[i + 1][j].lines[k].pt1 == "d" ||
-                    linecell_array[i + 1][j].lines[k].pt2 == "d") {
-//                    cout << "Działa powinno być b" << endl;
-                    if(linecell_array[i+1][j].lines[k].pt1 == "d"){
-                        temp_array_with_lines.push_back(linecell_array[i+1][j].lines[k]);
-                    }else{
-                        Point temp1;
-                        temp1 = linecell_array[i+1][j].lines[k].point1;
-                        linecell_array[i+1][j].lines[k].point1 = linecell_array[i+1][j].lines[k].point2;
-                        linecell_array[i+1][j].lines[k].point2 = temp1;
-                        temp_array_with_lines.push_back(linecell_array[i+1][j].lines[k]);
-                    }
-                    if(linecell_array[i][j].lines.size()>0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
-                    }
-                    if(i+1<x_length-1) {
-                        return check(i + 1, j);
-                    }
-                }
         }
     }
-    if(j+1<y_length-1 && (linecell_array[i][j].lines[0].pt1 == "c" || linecell_array[i][j].lines[0].pt2 == "c")) {
-            for (int k = 0; k < linecell_array[i][j + 1].lines.size(); k++) {
-                if (linecell_array[i][j + 1].lines[k].pt1 == "a" ||
-                    linecell_array[i][j + 1].lines[k].pt2 == "a") {
-//                    cout << "Działa powinno być c" << endl;
-                    if(linecell_array[i][j + 1].lines[k].pt1 == "a"){
-                        temp_array_with_lines.push_back(linecell_array[i][j+1].lines[k]);
-                    }else{
-                        Point temp1;
-                        temp1 = linecell_array[i][j+1].lines[k].point1;
-                        linecell_array[i][j+1].lines[k].point1 = linecell_array[i][j+1].lines[k].point2;
-                        linecell_array[i][j+1].lines[k].point2 = temp1;
-                        temp_array_with_lines.push_back(linecell_array[i][j+1].lines[k]);
-                    }
-                    if(linecell_array[i][j].lines.size()>0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
-                    }
-                    if(j+1<y_length-1) {
-                        return check(i, j + 1);
-                    }
+    if (i + 1 < x_length - 1 &&
+        (linecell_array[i][j].lines[z].pt1 == "b" || linecell_array[i][j].lines[z].pt2 == "b")) {
+        for (int k = 0; k < linecell_array[i + 1][j].lines.size(); k++) {
+            if (linecell_array[i + 1][j].lines[k].pt1 == "d" ||
+                linecell_array[i + 1][j].lines[k].pt2 == "d") {
+                cout<<"Przeszło bd"<<endl;
+                cout<<linecell_array[i + 1][j].lines[k].pt1<<" "<<linecell_array[i+1][j].lines[k].pt2<<endl;
+                if (linecell_array[i + 1][j].lines[k].pt1 == "d") {
+                    temp_array_with_lines.push_back(linecell_array[i + 1][j].lines[k]);
+                } else {
+                    Point temp1;
+                    temp1 = linecell_array[i + 1][j].lines[k].point1;
+                    linecell_array[i + 1][j].lines[k].point1 = linecell_array[i + 1][j].lines[k].point2;
+                    linecell_array[i + 1][j].lines[k].point2 = temp1;
+                    temp_array_with_lines.push_back(linecell_array[i + 1][j].lines[k]);
+                }
+                if (linecell_array[i][j].lines.size() > 0) {
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
+                }
+                if (i + 1 < x_length - 1) {
+                    return check(i + 1, j);
                 }
             }
+        }
     }
-    if(i-1>=0 && (linecell_array[i][j].lines[0].pt1 == "d" || linecell_array[i][j].lines[0].pt2 == "d")) {
-            for (int k = 0; k < linecell_array[i - 1][j].lines.size(); k++) {
-                if (linecell_array[i - 1][j].lines[k].pt1 == "b" ||
-                    linecell_array[i - 1][j].lines[k].pt2 == "b") {
-//                    cout << "Działa powinno być d" << endl;
-                    if(linecell_array[i-1][j].lines[k].pt1 == "b"){
-                        temp_array_with_lines.push_back(linecell_array[i-1][j].lines[k]);
-                    }else{
-                        Point temp1;
-                        temp1 = linecell_array[i-1][j].lines[k].point1;
-                        linecell_array[i-1][j].lines[k].point1 = linecell_array[i-1][j].lines[k].point2;
-                        linecell_array[i-1][j].lines[k].point2 = temp1;
-                        temp_array_with_lines.push_back(linecell_array[i-1][j].lines[k]);
-                    }
-                    if(linecell_array[i][j].lines.size()>0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
-                    }
-                    return check(i - 1, j);
+    if (j + 1 < y_length - 1 &&
+        (linecell_array[i][j].lines[z].pt1 == "c" || linecell_array[i][j].lines[z].pt2 == "c")) {
+        for (int k = 0; k < linecell_array[i][j + 1].lines.size(); k++) {
+            if (linecell_array[i][j + 1].lines[k].pt1 == "a" ||
+                linecell_array[i][j + 1].lines[k].pt2 == "a") {
+                cout<<"Przeszło ca"<<endl;
+                cout<<linecell_array[i][j+1].lines[k].pt1<<" "<<linecell_array[i][j+1].lines[k].pt2<<endl;
+                if (linecell_array[i][j + 1].lines[k].pt1 == "a") {
+                    temp_array_with_lines.push_back(linecell_array[i][j + 1].lines[k]);
+                } else {
+                    Point temp1;
+                    temp1 = linecell_array[i][j + 1].lines[k].point1;
+                    linecell_array[i][j + 1].lines[k].point1 = linecell_array[i][j + 1].lines[k].point2;
+                    linecell_array[i][j + 1].lines[k].point2 = temp1;
+                    temp_array_with_lines.push_back(linecell_array[i][j + 1].lines[k]);
+                }
+                if (linecell_array[i][j].lines.size() > 0) {
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
+                }
+                if (j + 1 < y_length - 1) {
+                    return check(i, j + 1);
+                }
+            }
+        }
+    }
+    if (i - 1 >= 0 && (linecell_array[i][j].lines[z].pt1 == "d" || linecell_array[i][j].lines[z].pt2 == "d")) {
 
+        for (int k = 0; k < linecell_array[i - 1][j].lines.size(); k++) {
+            if (linecell_array[i - 1][j].lines[k].pt1 == "b" ||
+                linecell_array[i - 1][j].lines[k].pt2 == "b") {
+                cout<<"Przeszło db"<<endl;
+                cout<<linecell_array[i-1][j].lines[k].pt1<<" "<<linecell_array[i-1][j].lines[k].pt2<<endl;
+                if (linecell_array[i - 1][j].lines[k].pt1 == "b") {
+                    temp_array_with_lines.push_back(linecell_array[i - 1][j].lines[k]);
+                } else {
+                    Point temp1;
+                    temp1 = linecell_array[i - 1][j].lines[k].point1;
+                    linecell_array[i - 1][j].lines[k].point1 = linecell_array[i - 1][j].lines[k].point2;
+                    linecell_array[i - 1][j].lines[k].point2 = temp1;
+                    temp_array_with_lines.push_back(linecell_array[i - 1][j].lines[k]);
                 }
+                if (linecell_array[i][j].lines.size() > 0) {
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
+                }
+                return check(i - 1, j);
             }
+        }
     }
+}
 }
 void add_feature_to_shapefile(){
     OGRLineString ls;
@@ -472,6 +513,7 @@ void add_feature_to_shapefile(){
 
     poFeature9->SetGeometry(&ls);
     cout<<"poFeature9 : "<<poFeature9->GetGeometryRef()->exportToJson()<<endl;
+    cout<<"Przerwa"<<endl;
     poLayertest->CreateFeature(poFeature9);
     poLayertest->SetFeature(poFeature9);
 }
@@ -512,32 +554,7 @@ void get_lines(int i, int j) {
 //                        check(temp_i,temp_j,"d");
                     }
                     for (int l = 0; l < linecell_array[temp_i - 1][temp_j].lines.size(); l++) {
-//                        cout<<"Rozmiar"<<linecell_array[temp_i - 1][temp_j].lines.size()<<endl;
-//                        cout << "test" << linecell_array[temp_i - 1][temp_j].lines[l].pt1 << endl;
-//                        cout << "test2" << linecell_array[temp_i - 1][temp_j].lines[l].pt2 << endl;
-                        //for w ktorym sprawdzam komorke z lewej strony
-//                        if (linecell_array[temp_i - 1][temp_j].lines[l].pt1 == "b") {
-//                            cout << "z lewej jeden" << endl;
-//                            cout << linecell_array[temp_i - 1][temp_j].lines[l].pt1 << " "
-//                                 << linecell_array[temp_i - 1][temp_j].lines[l].pt2 << endl;
-//                            cout<<"dlugosc "<<linecell_array[temp_i - 1][temp_j].lines.size()<<endl;
-//                            linecell_array[temp_i - 1][temp_j].lines.erase(linecell_array[temp_i - 1][temp_j].lines.begin()+ l);
-//                            cout<<"dlugosc po zmianach "<<linecell_array[temp_i - 1][temp_j].lines.size()<<endl;
-//                            temp_i = temp_i - 1;
-//
-//                            break;
-//
-////                                        continue;
-//                        }
-//                        if (linecell_array[temp_i - 1][temp_j].lines[l].pt2 == "b") {
-//                            cout << "z lewej dwa" << endl;
-//                            cout << linecell_array[temp_i - 1][temp_j].lines[l].pt1 << " "
-//                                 << linecell_array[temp_i - 1][temp_j].lines[l].pt2 << endl;
-//                            linecell_array[temp_i - 1][temp_j].lines.erase(linecell_array[temp_i - 1][temp_j].lines.begin() + l);
-//                            temp_i = temp_i - 1;
-//
-//                            break;
-//                        }
+
                     }
                 }
 
@@ -650,31 +667,40 @@ void get_lines(int i, int j) {
 }
 
 void check_how_it_looks() {
+    int ca = 0;
     for (int i = 0; i < x_length - 1; i++) {
         for (int j = 0; j < y_length - 1; j++) {
-            if(linecell_array[i][j].lines.size() > 0) {
-                temp_array_with_lines.push_back(linecell_array[i][j].lines[0]);
-//                cout<<"Szukane i j"<< i  <<"  "<< j<<endl;
-                check(i,j);
-                cout<<"Rozmiar "<<temp_array_with_lines.size()<<endl;
-                if(temp_array_with_lines.size()>0){
-                    add_feature_to_shapefile();
+            for(int t=0;t<linecell_array[i][j].lines.size();t++) {
+                if (linecell_array[i][j].lines.size() > 0) {
+                    temp_array_with_lines.push_back(linecell_array[i][j].lines[t]);
+                    check(i, j);
+                    ca++;
+                    if (temp_array_with_lines.size() > 0) {
+                        add_feature_to_shapefile();
+                    }
+                    temp_array_with_lines.clear();
                 }
-                temp_array_with_lines.clear();
             }
         }
     }
+    cout<<"Wygenerowano : "<<ca<<endl;
 //    cout<<linecell_array[4][121].lines[0].pt1<<" "<< linecell_array[4][121].lines[0].pt2<<endl;
     for (int i = 0; i < x_length - 1; i++) {
         for (int j = 0; j < y_length - 1; j++) {
+            if(linecell_array[i][j].lines.size()>1){
+                cout<<"jeden"<<endl;
+                for(int k=0; k<linecell_array[i][j].lines.size();k++){
+                    cout<<"Wyniczek : "<<linecell_array[i][j].lines[k].pt1<<" "<<linecell_array[i][j].lines[k].pt2<<endl;
+                }
+            }
 //            cout<<linecell_array[i][j].lines.size()<<endl;
-            if(linecell_array[i][j].lines.size() == 1){
-                cout<<"i1 :"<<i<<" j1 :"<<j<<endl;
-                cout<<linecell_array[i][j].lines[0].pt1<<" "<< linecell_array[i][j].lines[0].pt2<<endl;
-            }
-            if(linecell_array[i][j].lines.size() == 2){
-                cout<<"i "<<i<<" j "<<j<<endl;
-            }
+//            if(linecell_array[i][j].lines.size() == 1){
+////                cout<<"i1 :"<<i<<" j1 :"<<j<<endl;
+//                cout<<linecell_array[i][j].lines[0].pt1<<" "<< linecell_array[i][j].lines[0].pt2<<endl;
+//            }
+//            if(linecell_array[i][j].lines.size() == 2){
+////                cout<<"i "<<i<<" j "<<j<<endl;
+//            }
         }
     }
 }
@@ -709,6 +735,16 @@ void Grid::set_important_values_for_every_linecell(liblas::Header header) {
             checkValuesv2(linecell_array[i][j], i, j);
         }
     }
+//    for (int i = 0; i < x_length - 1; i++){
+//        for (int j = 0; j < y_length - 1; j++) {
+//            if(linecell_array[i][j].lines.size()>1){
+//                for(int k=0; k<linecell_array[i][j].lines.size()<k;k++){
+//                    cout<<"Wyniczek : "<<linecell_array[i][j].lines[k].pt1<<" "<<linecell_array[i][j].lines[k].pt2<<endl;
+//                }
+//            }
+//        }
+//    }
+    cout<<"ct3 : "<<ct3<<endl;
     check_how_it_looks();
 //#pragma omp critical
 //{
