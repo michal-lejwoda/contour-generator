@@ -388,7 +388,7 @@ void checkValuesv2(LineCell cell, int i, int j) {
     }
 }
 
-void check(int i,int j){
+void check(int i,int j,string pt1,string pt2,int index){
 
     cout<<"i "<<i<<" j "<<j<<endl;
 
@@ -398,36 +398,44 @@ void check(int i,int j){
 //    }
 
 //    temp_array_with_lines.push_back(linecell_array[i][j].lines[0]);
-for(int z=0; z<linecell_array[i][j].lines.size();z++) {
-    cout<<"Podstawa Tu znajduje sie "<<linecell_array[i][j].lines[z].pt1<<" "<<linecell_array[i][j].lines[z].pt2<<endl;
+//for(int z=0; z<linecell_array[i][j].lines.size();z++) {
+    cout<<"Podstawa Tu znajduje sie "<<pt1<<" "<<pt2<<endl;
     //    cout<<linecell_array[i][j].lines[z].pt1<<" "<<linecell_array[i][j].lines[z].pt2<<endl;
-    if (j - 1 >= 0 && (linecell_array[i][j].lines[z].pt1 == "a" || linecell_array[i][j].lines[z].pt2 == "a")) {
+    if (j - 1 >= 0 && (pt1 == "a" || pt2 == "a")) {
         for (int k = 0; k < linecell_array[i][j - 1].lines.size(); k++) {
             if (linecell_array[i][j - 1].lines[k].pt1 == "c" ||
                 linecell_array[i][j - 1].lines[k].pt2 == "c") {
-                cout<<"Sprawdzenie ac co tu jest "<<linecell_array[i][j].lines[z].pt1<<" "<<linecell_array[i][j].lines[z].pt2<<endl;
+                cout<<"Sprawdzenie ac co tu jest "<<pt1<<" "<<pt2<<endl;
                 cout<<"Przeszło ac"<<endl;
                 cout<<linecell_array[i][j - 1].lines[k].pt1<<" "<<linecell_array[i][j - 1].lines[k].pt2<<endl;
                 if (linecell_array[i][j - 1].lines[k].pt1 == "c") {
                     temp_array_with_lines.push_back(linecell_array[i][j - 1].lines[k]);
+//                    if (linecell_array[i][j].lines.size() > 0) {
+                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+//                    }
+                    if (j - 1 > 0) {
+                        return check(i, j - 1,linecell_array[i][j - 1].lines[k].pt1,linecell_array[i][j - 1].lines[k].pt2,k);
+                    }
                 } else {
                     Point temp1;
                     temp1 = linecell_array[i][j - 1].lines[k].point1;
                     linecell_array[i][j - 1].lines[k].point1 = linecell_array[i][j - 1].lines[k].point2;
                     linecell_array[i][j - 1].lines[k].point2 = temp1;
                     temp_array_with_lines.push_back(linecell_array[i][j - 1].lines[k]);
+//                    if (linecell_array[i][j].lines.size() > 0) {
+                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+//                    }
+                    if (j - 1 > 0) {
+                        return check(i, j - 1,linecell_array[i][j - 1].lines[k].pt2,linecell_array[i][j - 1].lines[k].pt1,k);
+                    }
                 }
-                if (linecell_array[i][j].lines.size() > 0) {
-                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
-                }
-                if (j - 1 > 0) {
-                    return check(i, j - 1);
-                }
+
+
             }
         }
     }
     if (i + 1 < x_length - 1 &&
-        (linecell_array[i][j].lines[z].pt1 == "b" || linecell_array[i][j].lines[z].pt2 == "b")) {
+        (pt1 == "b" || pt2 == "b")) {
         for (int k = 0; k < linecell_array[i + 1][j].lines.size(); k++) {
             if (linecell_array[i + 1][j].lines[k].pt1 == "d" ||
                 linecell_array[i + 1][j].lines[k].pt2 == "d") {
@@ -435,24 +443,32 @@ for(int z=0; z<linecell_array[i][j].lines.size();z++) {
                 cout<<linecell_array[i + 1][j].lines[k].pt1<<" "<<linecell_array[i+1][j].lines[k].pt2<<endl;
                 if (linecell_array[i + 1][j].lines[k].pt1 == "d") {
                     temp_array_with_lines.push_back(linecell_array[i + 1][j].lines[k]);
+//                    if (linecell_array[i][j].lines.size() > 0) {
+                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+//                    }
+                    if (i + 1 < x_length - 1) {
+                        return check(i + 1, j,linecell_array[i + 1][j].lines[k].pt1,linecell_array[i + 1][j].lines[k].pt2,k);
+                    }
                 } else {
                     Point temp1;
                     temp1 = linecell_array[i + 1][j].lines[k].point1;
                     linecell_array[i + 1][j].lines[k].point1 = linecell_array[i + 1][j].lines[k].point2;
                     linecell_array[i + 1][j].lines[k].point2 = temp1;
                     temp_array_with_lines.push_back(linecell_array[i + 1][j].lines[k]);
+//                    if (linecell_array[i][j].lines.size() > 0) {
+                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+//                    }
+                    if (i + 1 < x_length - 1) {
+                        return check(i + 1, j,linecell_array[i + 1][j].lines[k].pt2,linecell_array[i + 1][j].lines[k].pt1,k);
+                    }
                 }
-                if (linecell_array[i][j].lines.size() > 0) {
-                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
-                }
-                if (i + 1 < x_length - 1) {
-                    return check(i + 1, j);
-                }
+
+
             }
         }
     }
     if (j + 1 < y_length - 1 &&
-        (linecell_array[i][j].lines[z].pt1 == "c" || linecell_array[i][j].lines[z].pt2 == "c")) {
+        (pt1 == "c" || pt2 == "c")) {
         for (int k = 0; k < linecell_array[i][j + 1].lines.size(); k++) {
             if (linecell_array[i][j + 1].lines[k].pt1 == "a" ||
                 linecell_array[i][j + 1].lines[k].pt2 == "a") {
@@ -460,23 +476,30 @@ for(int z=0; z<linecell_array[i][j].lines.size();z++) {
                 cout<<linecell_array[i][j+1].lines[k].pt1<<" "<<linecell_array[i][j+1].lines[k].pt2<<endl;
                 if (linecell_array[i][j + 1].lines[k].pt1 == "a") {
                     temp_array_with_lines.push_back(linecell_array[i][j + 1].lines[k]);
+//                    if (linecell_array[i][j].lines.size() > 0) {
+                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+//                    }
+                    if (j + 1 < y_length - 1) {
+                        return check(i, j + 1,linecell_array[i][j + 1].lines[k].pt1,linecell_array[i][j + 1].lines[k].pt2,k);
+                    }
                 } else {
                     Point temp1;
                     temp1 = linecell_array[i][j + 1].lines[k].point1;
                     linecell_array[i][j + 1].lines[k].point1 = linecell_array[i][j + 1].lines[k].point2;
                     linecell_array[i][j + 1].lines[k].point2 = temp1;
                     temp_array_with_lines.push_back(linecell_array[i][j + 1].lines[k]);
+                    if (linecell_array[i][j].lines.size() > 0) {
+                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+                    }
+                    if (j + 1 < y_length - 1) {
+                        return check(i, j + 1,linecell_array[i][j + 1].lines[k].pt2,linecell_array[i][j + 1].lines[k].pt1,k);
+                    }
                 }
-                if (linecell_array[i][j].lines.size() > 0) {
-                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
-                }
-                if (j + 1 < y_length - 1) {
-                    return check(i, j + 1);
-                }
+
             }
         }
     }
-    if (i - 1 >= 0 && (linecell_array[i][j].lines[z].pt1 == "d" || linecell_array[i][j].lines[z].pt2 == "d")) {
+    if (i - 1 >= 0 && (pt1 == "d" || pt2 == "d")) {
 
         for (int k = 0; k < linecell_array[i - 1][j].lines.size(); k++) {
             if (linecell_array[i - 1][j].lines[k].pt1 == "b" ||
@@ -485,21 +508,31 @@ for(int z=0; z<linecell_array[i][j].lines.size();z++) {
                 cout<<linecell_array[i-1][j].lines[k].pt1<<" "<<linecell_array[i-1][j].lines[k].pt2<<endl;
                 if (linecell_array[i - 1][j].lines[k].pt1 == "b") {
                     temp_array_with_lines.push_back(linecell_array[i - 1][j].lines[k]);
+                    if (linecell_array[i][j].lines.size() > 0) {
+                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+                        cout<<"Size po usunieciu "<<linecell_array[i][j].lines.size()<<endl;
+                    }
+                    return check(i - 1, j,linecell_array[i - 1][j].lines[k].pt1,linecell_array[i - 1][j].lines[k].pt2,k);
                 } else {
                     Point temp1;
                     temp1 = linecell_array[i - 1][j].lines[k].point1;
                     linecell_array[i - 1][j].lines[k].point1 = linecell_array[i - 1][j].lines[k].point2;
                     linecell_array[i - 1][j].lines[k].point2 = temp1;
                     temp_array_with_lines.push_back(linecell_array[i - 1][j].lines[k]);
+//                    if (linecell_array[i][j].lines.size() > 0) {
+                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+//                    }
+                    return check(i - 1, j,linecell_array[i - 1][j].lines[k].pt2,linecell_array[i - 1][j].lines[k].pt1,k);
                 }
-                if (linecell_array[i][j].lines.size() > 0) {
-                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + k);
-                }
-                return check(i - 1, j);
+
+
             }
         }
     }
-}
+    if(linecell_array[i][j].lines.size()>0) {
+        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + 0);
+    }
+//}
 }
 void add_feature_to_shapefile(){
     OGRLineString ls;
@@ -667,19 +700,25 @@ void get_lines(int i, int j) {
 }
 
 void check_how_it_looks() {
+    cout<<"Roz : "<<linecell_array[35][67].lines.size()<<endl;
+    for(int o=0;o<linecell_array[35][67].lines.size();o++){
+        cout<<"Punkty: "<<linecell_array[35][67].lines[o].pt1<<" "<<linecell_array[35][67].lines[o].pt2<<endl;
+        cout<<"pt1: "<<linecell_array[35][67].lines[o].point1.x<<" "<<linecell_array[35][67].lines[o].point1.y<<endl;
+        cout<<"pt2: "<<linecell_array[35][67].lines[o].point2.x<<" "<<linecell_array[35][67].lines[o].point2.y<<endl;
+    }
     int ca = 0;
     for (int i = 0; i < x_length - 1; i++) {
         for (int j = 0; j < y_length - 1; j++) {
-            for(int t=0;t<linecell_array[i][j].lines.size();t++) {
+//            for(int t=0;t<linecell_array[i][j].lines.size();t++) {
                 if (linecell_array[i][j].lines.size() > 0) {
-                    temp_array_with_lines.push_back(linecell_array[i][j].lines[t]);
-                    check(i, j);
+                    temp_array_with_lines.push_back(linecell_array[i][j].lines[0]);
+                    check(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
                     ca++;
-                    if (temp_array_with_lines.size() > 0) {
+//                    if (temp_array_with_lines.size() > 0) {
                         add_feature_to_shapefile();
-                    }
+//                    }
                     temp_array_with_lines.clear();
-                }
+//                }
             }
         }
     }
