@@ -63,6 +63,7 @@ int main() {
     std::ifstream ifs;
 //    ifs.open("/home/saxatachi/las_data/points2.las", std::ios::in | std::ios::binary);
 //    clock_t start = clock();
+//    ifs.open("/home/saxatachi/las_data/points800.las", std::ios::in | std::ios::binary);
 //    ifs.open("/home/saxatachi/las_data/punkty_z_domami.las", std::ios::in | std::ios::binary);
     ifs.open("/home/saxatachi/las_data/test_lidar.las", std::ios::in | std::ios::binary);
     liblas::ReaderFactory f;
@@ -85,11 +86,11 @@ int main() {
     oFieldtest.SetWidth(32);
     poLayertest->CreateField(&oFieldtest);
     Grid grid;
-    double start = omp_get_wtime();
+//    double start = omp_get_wtime();
     grid.mainfunctions(header, reader);
-    double end = omp_get_wtime();
-    double elapsed = double(end - start);
-    cout << "elapsed check every value " << elapsed << endl;
+//    double end = omp_get_wtime();
+//    double elapsed = double(end - start);
+//    cout << "elapsed check every value " << elapsed << endl;
     GDALClose(poDStest);
     cout<<"test"<<endl;
 //    OGRLineString ls;
@@ -191,7 +192,7 @@ int main() {
 //    }
 //    clock_t end = clock();
 //    double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    printf("Time measured: %.3f seconds.\n", elapsed);
+//    printf("Time measured: %.3f seconds.\n", elapsed);
 //    GDALDriver *poDriver2;
 //    poDriver2 = GetGDALDriverManager()->GetDriverByName(pszDriverName);
 //    GDALDataset *poDS2;
