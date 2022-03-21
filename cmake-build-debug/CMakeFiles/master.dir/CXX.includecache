@@ -6,28 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/saxatachi/CLionProjects/master/grid.cpp
-cmath
--
-grid.h
-/home/saxatachi/CLionProjects/master/grid.h
-structures.h
-/home/saxatachi/CLionProjects/master/structures.h
-omp.h
--
-stdio.h
--
-stdlib.h
--
-gdal/gdal.h
--
-gdal/gdal_priv.h
-/home/saxatachi/CLionProjects/master/gdal/gdal_priv.h
-gdal/cpl_conv.h
-/home/saxatachi/CLionProjects/master/gdal/cpl_conv.h
-gdal/ogrsf_frmts.h
-/home/saxatachi/CLionProjects/master/gdal/ogrsf_frmts.h
-
 /home/saxatachi/CLionProjects/master/grid.h
 iostream
 -
