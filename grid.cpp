@@ -72,17 +72,17 @@ void Grid::generateGrid(liblas::Header header) {
     double minx = header.GetMinX();
     double maxy = header.GetMaxY();
     double start = omp_get_wtime();
-#pragma omp parallel num_threads(12)
-    {
-
-#pragma omp for schedule(static)
+//#pragma omp parallel num_threads(12)
+//    {
+//
+//#pragma omp for schedule(static)
         for (int i = 0; i < x_length; i++) {
             for (int j = 0; j < y_length; j++) {
                 cell_array[i][j].centerx = minx + (i * (cellsize)) + (cellsize / 2);
                 cell_array[i][j].centery = maxy - ((j * (cellsize)) + (cellsize / 2));
             }
         }
-    };
+//    };
     double end = omp_get_wtime();
     double elapsed = end - start;
     cout << "elapsed generate grid = " << elapsed << endl;
@@ -287,8 +287,8 @@ double get_cell_value_from_the_closest_cells_with_value(int x, int y) {
             calculate_average_cell_value(x, y, temp_array);
             break;
         }
-        #pragma omp parallel
-        #pragma omp for
+//        #pragma omp parallel
+//        #pragma omp for
         for (int j = -i; j <= i; j++) {
             for (int k = -i; k <= i; k++) {
                 if (x - j > 0 && x - j < x_length && y - k > 0 && y - k < y_length) {
@@ -305,8 +305,8 @@ double get_cell_value_from_the_closest_cells_with_value(int x, int y) {
 
 void Grid::checkeveryvalue() {
     double start = omp_get_wtime();
-    #pragma omp parallel
-    #pragma omp for schedule(dynamic)
+//    #pragma omp parallel
+//    #pragma omp for schedule(dynamic)
     for (int i = 0; i < x_length; i++) {
         for (int j = 0; j < y_length; j++) {
             if (cell_array[i][j].value == 0) {
@@ -321,8 +321,8 @@ void Grid::checkeveryvalue() {
 
 void Grid::inverse_distance_weighting_algorithm() {
     double start = omp_get_wtime();
-#pragma omp parallel
-#pragma omp for schedule(static)
+//#pragma omp parallel
+//#pragma omp for schedule(static)
     for (int i = 0; i < x_length; i++) {
         for (int j = 0; j < y_length; j++) {
             double result = 0;
