@@ -20,11 +20,8 @@ extern std::vector<Line> array_with_lines;
 extern double isoline_value;
 extern std::vector<Linev2> temp_array_with_lines;
 extern OGRLayer *poLayertest;
-int ct2 = 0;
-int pop = 0;
-int ct3 = 0;
 
-int test(){
+int dominant_value(){
     int max = 0;
     int max_result = 0;
     map<int, int> mp;
@@ -39,21 +36,6 @@ int test(){
         return max_result;
     }
 }
-
-//void tets(){
-//    std::vector<int> test_array;
-//    test_array.push_back(2);
-//    test_array.push_back(3);
-//    test_array.push_back(43);
-//    test_array.push_back(52);
-//    test_array.push_back(54);
-//    test_array.erase(test_array.begin() + 3);
-//    for(int i=0;i<test_array.size();i++){
-//        cout<<"i "<<i<<endl;
-//        cout<<"test_array "<<test_array[i]<<endl;
-//    }
-//
-//}
 
 void Grid::mainfunctions(liblas::Header header, liblas::Reader reader) {
 //    double start = omp_get_wtime();
@@ -674,8 +656,7 @@ void add_feature_to_shapefile(){
     OGRLineString ls;
     OGRFeature *poFeature9;
     poFeature9 = OGRFeature::CreateFeature(poLayertest->GetLayerDefn());
-    poFeature9->SetField("Value", test());
-//    test();
+    poFeature9->SetField("Value", dominant_value());
     for (int i = 0; i < temp_array_with_lines.size(); i++) {
         ls.addPoint(temp_array_with_lines[i].point1.x, temp_array_with_lines[i].point1.y);
         ls.addPoint(temp_array_with_lines[i].point2.x, temp_array_with_lines[i].point2.y);
@@ -688,28 +669,6 @@ void add_feature_to_shapefile(){
     poLayertest->SetFeature(poFeature9);
 }
 
-//void create_shapefile(){
-////    GDALAllRegister();
-////    const char *pszDriverName = "ESRI Shapefile";
-////    GDALDriver *poDriver;
-////    poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName);
-////    GDALDataset *poDS;
-////    poDS = poDriver->Create("/home/saxatachi/Desktop/testjednejlinii123.shp", 0, 0, 0, GDT_Unknown, NULL);
-////    OGRLayer *poLayer;
-////    poLayer = poDS->CreateLayer("line_out", NULL, wkbLineString, NULL);
-////    OGRFieldDefn oField("Value", OFTString);
-////    oField.SetWidth(32);
-////    poLayer->CreateField(&oField);
-////    OGRLineString ls;
-////    OGRFeature *poFeature3;
-////    poFeature3 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-////    poFeature3->SetField("Value", temp_array[0].value);
-////    for (int i = 0; i < temp_array.size(); i++) {
-////        ls.addPoint(temp_array[i].point1.x, temp_array[i].point1.y);
-////        ls.addPoint(temp_array[i].point2.x, temp_array[i].point2.y);
-////    }
-//}
-
 void Grid::check_how_it_looks() {
 //    int ca = 0;
     double start = omp_get_wtime();
@@ -717,38 +676,28 @@ void Grid::check_how_it_looks() {
         for (int j = 0; j < y_length - 1; j++) {
             int temp_var = 0;
                 if (linecell_array[i][j].lines.size() > 0) {
-//                    cout<<linecell_array[i][j].lines[0].point1.x<<", "<<linecell_array[i][j].lines[0].point1.y<<endl;
-//                    cout<<linecell_array[i][j].lines[0].pt1<<" "<<linecell_array[i][j].lines[0].pt2<<endl;
                     temp_array_with_lines.push_back(linecell_array[i][j].lines[0]);
                     if(linecell_array[i][j].lines[0].pt1 == "a" ||linecell_array[i][j].lines[0].pt2 == "a"){
-
                         check(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
                         temp_var++;
                     }
                     if(linecell_array[i][j].lines[0].pt1 == "b" ||linecell_array[i][j].lines[0].pt2 == "b"){
-//                        cout<<"czy b"<<endl;
                         if(temp_var>0){
-//                            cout<<"jest wieksze"<<endl;
                             check_erase(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
                         }else {
-//                            cout<<"nie wieksze"<<endl;
                             check(i, j, linecell_array[i][j].lines[0].pt1, linecell_array[i][j].lines[0].pt2, 0);
                         }
                         temp_var++;
                     }
                     if(linecell_array[i][j].lines[0].pt1 == "c" ||linecell_array[i][j].lines[0].pt2 == "c"){
-//                        cout<<"czy c"<<endl;
                         if(temp_var>0){
                             check_erase(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
-
                         }else {
                             check(i, j, linecell_array[i][j].lines[0].pt1, linecell_array[i][j].lines[0].pt2, 0);
-//                            cout<<"check"<<endl;
                         }
                         temp_var++;
                     }
                     if(linecell_array[i][j].lines[0].pt1 == "d" ||linecell_array[i][j].lines[0].pt2 == "d"){
-
                         if(temp_var>0){
                             check_erase(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
                         }else {
@@ -756,7 +705,6 @@ void Grid::check_how_it_looks() {
                         }
                         temp_var++;
                     }
-//                    check(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
                     add_feature_to_shapefile();
                     temp_array_with_lines.clear();
             }

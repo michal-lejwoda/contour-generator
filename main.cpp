@@ -61,11 +61,11 @@ int main() {
     GDALAllRegister();
     cout.precision(15);
     std::ifstream ifs;
-//    ifs.open("/home/saxatachi/las_data/points2.las", std::ios::in | std::ios::binary);
+    ifs.open("/home/saxatachi/las_data/points13v2.las", std::ios::in | std::ios::binary);
 //    clock_t start = clock();
 //    ifs.open("/home/saxatachi/las_data/points800.las", std::ios::in | std::ios::binary);
 //    ifs.open("/home/saxatachi/las_data/punkty_z_domami.las", std::ios::in | std::ios::binary);
-    ifs.open("/home/saxatachi/las_data/test_lidar.las", std::ios::in | std::ios::binary);
+//    ifs.open("/home/saxatachi/las_data/test_lidar.las", std::ios::in | std::ios::binary);
     liblas::ReaderFactory f;
     liblas::Reader reader = f.CreateWithStream(ifs);
     liblas::Header const &header = reader.GetHeader();
