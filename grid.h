@@ -16,6 +16,7 @@ public:
     double neighbours(int x, int y);
     void check_if_point_belongs_to_neighbours(int x,int y,liblas::Point);
     void checkeveryvalue();
+    void check_how_it_looks();
 
 };
 #endif
