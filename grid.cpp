@@ -40,21 +40,6 @@ int test(){
     }
 }
 
-//void tets(){
-//    std::vector<int> test_array;
-//    test_array.push_back(2);
-//    test_array.push_back(3);
-//    test_array.push_back(43);
-//    test_array.push_back(52);
-//    test_array.push_back(54);
-//    test_array.erase(test_array.begin() + 3);
-//    for(int i=0;i<test_array.size();i++){
-//        cout<<"i "<<i<<endl;
-//        cout<<"test_array "<<test_array[i]<<endl;
-//    }
-//
-//}
-
 void Grid::mainfunctions(liblas::Header header, liblas::Reader reader) {
 //    double start = omp_get_wtime();
     generateGrid(header);
