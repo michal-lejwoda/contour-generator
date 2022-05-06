@@ -57,13 +57,13 @@ OGRLayer *poLayertest;
 //}
 
 int main() {
-    cout<<omp_get_num_procs()<<endl;
+//    cout<<omp_get_num_procs()<<endl;
     GDALAllRegister();
     cout.precision(15);
     std::ifstream ifs;
-    ifs.open("/home/saxatachi/las_data/points13v2.las", std::ios::in | std::ios::binary);
+//    ifs.open("/home/saxatachi/las_data/points13v2.las", std::ios::in | std::ios::binary);
 //    clock_t start = clock();
-//    ifs.open("/home/saxatachi/las_data/points800.las", std::ios::in | std::ios::binary);
+    ifs.open("/home/saxatachi/las_data/points800v2.las", std::ios::in | std::ios::binary);
 //    ifs.open("/home/saxatachi/las_data/punkty_z_domami.las", std::ios::in | std::ios::binary);
 //    ifs.open("/home/saxatachi/las_data/test_lidar.las", std::ios::in | std::ios::binary);
     liblas::ReaderFactory f;
@@ -73,36 +73,16 @@ int main() {
     y_length = ceil((header.GetMaxY() - header.GetMinY()) / cellsize);
     cell_array = vector<vector<Cell>>(x_length, vector<Cell>(y_length));
     linecell_array = vector<vector<LineCell>>(x_length - 1, vector<LineCell>(y_length - 1));
-
-
-//    GDALDataset *poDStest;
     const char *pszDriverNametest = "ESRI Shapefile";
-//    GDALDriver *poDrivertest;
     poDrivertest = GetGDALDriverManager()->GetDriverByName(pszDriverNametest);
-    poDStest = poDrivertest->Create("/home/saxatachi/Desktop/testjednejlinii13.shp", 0, 0, 0, GDT_Unknown, NULL);
-//    OGRLayer *poLayertest;
+    poDStest = poDrivertest->Create("/home/saxatachi/Desktop/lines3.shp", 0, 0, 0, GDT_Unknown, NULL);
     poLayertest = poDStest->CreateLayer("line_jeden", NULL, wkbLineString, NULL);
     OGRFieldDefn oFieldtest("Value", OFTString);
     oFieldtest.SetWidth(32);
     poLayertest->CreateField(&oFieldtest);
     Grid grid;
-//    double start = omp_get_wtime();
     grid.mainfunctions(header, reader);
-//    double end = omp_get_wtime();
-//    double elapsed = double(end - start);
-//    cout << "elapsed check every value " << elapsed << endl;
     GDALClose(poDStest);
-    cout<<"test"<<endl;
-//    OGRLineString ls;
-//    OGRFeature *poFeature3;
-//    poFeature3 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-//    poFeature3->SetField("Value", temp_array_with_lines[0].value);
-//    for (int i = 0; i < temp_array_with_lines.size(); i++) {
-//        ls.addPoint(temp_array_with_lines[i].point1.x, temp_array_with_lines[i].point1.y);
-//        ls.addPoint(temp_array_with_lines[i].point2.x, temp_array_with_lines[i].point2.y);
-//    }
-
-
     GDALDataset *poDS1;
     poDS1 = (GDALDataset *) GDALOpenEx("/home/saxatachi/Desktop/testaa.shp", GDAL_OF_VECTOR, NULL, NULL, NULL);
     if (poDS1 == NULL) {
@@ -126,70 +106,6 @@ int main() {
     OGRFieldDefn oField("Value", OFTString);
     oField.SetWidth(32);
     poLayer->CreateField(&oField);
-//    while (array_with_lines.size() != 0) {
-//        Line var = temp_array.back();
-//        Line var1 = temp_array.front();
-//        int temp_size = temp_array.size();
-//        for (int i = 0; i < array_with_lines.size(); i++) {
-//            if (abs(var.i - array_with_lines[i].i) <= 1 && abs(var.j - array_with_lines[i].j) <= 1 ||
-//                abs(var1.i - array_with_lines[i].i) <= 1 && abs(var1.j - array_with_lines[i].j) <= 1) {
-//                if (sqrt(pow((var.point2.x - array_with_lines[i].point1.x), 2) +
-//                         pow(var.point2.y - array_with_lines[i].point1.y, 2)) < 0.005) {
-//                    it = array_with_lines.begin() + i;
-//                    temp_array.push_back(array_with_lines[i]);
-//                    array_with_lines.erase(it);
-//                    break;
-//                }
-//                if (sqrt(pow((var.point2.x - array_with_lines[i].point2.x), 2) +
-//                         pow(var.point2.y - array_with_lines[i].point2.y, 2)) < 0.005) {
-//                    Point temp_var = array_with_lines[i].point2;
-//                    array_with_lines[i].point2 = array_with_lines[i].point1;
-//                    array_with_lines[i].point1 = temp_var;
-//                    it = array_with_lines.begin() + i;
-//                    temp_array.push_back(array_with_lines[i]);
-//                    array_with_lines.erase(it);
-//                    break;
-//                }
-//                if (sqrt(pow((var1.point1.x - array_with_lines[i].point1.x), 2) +
-//                         pow(var1.point1.y - array_with_lines[i].point1.y, 2)) < 0.005) {
-//                    Point temp_var = array_with_lines[i].point2;
-//                    array_with_lines[i].point2 = array_with_lines[i].point1;
-//                    array_with_lines[i].point1 = temp_var;
-//                    it = array_with_lines.begin() + i;
-//                    temp_array.insert(temp_array.begin(), 1, array_with_lines[i]);
-//                    array_with_lines.erase(it);
-//                    break;
-//                }
-//                if (sqrt(pow((var1.point1.x - array_with_lines[i].point2.x), 2) +
-//                         pow(var1.point1.y - array_with_lines[i].point2.y, 2)) < 0.005) {
-//                    it = array_with_lines.begin() + i;
-//                    temp_array.insert(temp_array.begin(), 1, array_with_lines[i]);
-//                    array_with_lines.erase(it);
-//                    break;
-//                }
-//            }
-//        }
-//        if (temp_size == temp_array.size()) {
-//            OGRLineString ls;
-//            OGRFeature *poFeature3;
-//            poFeature3 = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-//            poFeature3->SetField("Value", temp_array[0].value);
-//            for (int i = 0; i < temp_array.size(); i++) {
-//                ls.addPoint(temp_array[i].point1.x, temp_array[i].point1.y);
-//                ls.addPoint(temp_array[i].point2.x, temp_array[i].point2.y);
-//            }
-//            poFeature3->SetGeometry(&ls);
-//            poLayer->CreateFeature(poFeature3);
-////            cout<<poFeature3->GetGeometryRef()->exportToJson()<<endl;
-//
-//            temp_array.clear();
-//            if (array_with_lines.size() > 0) {
-//                temp_array.push_back(array_with_lines[0]);
-//                it = array_with_lines.begin();
-//                array_with_lines.erase(it);
-//            }
-//        }
-//    }
 //    clock_t end = clock();
 //    double elapsed = double(end - start) / CLOCKS_PER_SEC;
 //    printf("Time measured: %.3f seconds.\n", elapsed);
