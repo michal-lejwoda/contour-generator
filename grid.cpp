@@ -41,7 +41,9 @@ void Grid::mainfunctions(liblas::Header header, liblas::Reader reader) {
     generateGrid(header);
     distance_beetween_points(header, reader);
     inverse_distance_weighting_algorithm();
+
     checkeveryvalue();
+    create_raster(header);
     set_important_values_for_every_linecell(header);
     check_how_it_looks();
 }
@@ -713,6 +715,37 @@ void Grid::set_important_values_for_every_linecell(liblas::Header header) {
     double end = omp_get_wtime();
     double elapsed = double(end - start);
     cout << "elapsed set_important_values_for_every_linecell = " << elapsed << endl;
+}
+
+void Grid::create_raster(liblas::Header header) {
+    GDALDataset  *poDataset;
+    GDALDataset *pNewDS;
+    GDALDriver *pDriverTiff;
+    char const * pszFilename = "/home/saxatachi/Desktop/inter_raster.tif";
+    char const * output = "/home/saxatachi/Desktop/neww.tif";
+    poDataset = (GDALDataset *) GDALOpen( pszFilename, GA_ReadOnly );
+        double noData;
+        double transform[6];
+        transform[0] = header.GetMinX();
+        transform[1] = 0.5;
+        transform[2] = 0;
+        transform[3] = header.GetMinY();
+        transform[4] = 0;
+        transform[5] = 0.5;
+        pDriverTiff = GetGDALDriverManager()->GetDriverByName("GTiff");
+        pNewDS = pDriverTiff->Create(output,x_length,y_length,1,GDT_Float32,NULL);
+        pNewDS->SetGeoTransform(transform);
+        float *newwRow = (float*) CPLMalloc(sizeof(float)*x_length);
+
+// Uzupełnianie komórek rastra
+        for(int i=0;i<y_length;i++){
+            for(int j=0;j<x_length;j++){
+                newwRow[j] = cell_array[i][j].value;
+            }
+            pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,x_length,1,newwRow,y_length,1,GDT_Float32,0,0);
+        }
+        GDALClose(poDataset);
+        GDALClose(pNewDS);
 }
 
 
