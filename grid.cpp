@@ -41,7 +41,6 @@ void Grid::mainfunctions(liblas::Header header, liblas::Reader reader) {
     generateGrid(header);
     distance_beetween_points(header, reader);
     inverse_distance_weighting_algorithm();
-
     checkeveryvalue();
     create_raster(header);
     set_important_values_for_every_linecell(header);
@@ -110,31 +109,6 @@ void Grid::check_if_point_belongs_to_neighbours(int x, int y, liblas::Point p) {
     }
 }
 
-double Grid::neighbours(int x, int y) {
-    for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
-            if (x - i > 0 && x - i < x_length && y - j > 0 && y - j < y_length) {
-                if (cell_array[x - i][y - j].pointsdistance.size() > 0) {
-                    cell_array[x][y].value = cell_array[x - i][y - j].pointsdistance[0].point.GetZ();
-                    return cell_array[x][y].value;
-                }
-            }
-        }
-    }
-    return cell_array[x][y].value = 77;
-}
-
-void generate_line(Point point1, Point point2, double firstpoint, double secondpoint, int i, int j,
-                   std::vector<Line> array_with_lines1) {
-    if (floor(firstpoint / isoline_value) == ceil(secondpoint / isoline_value)) {
-        Line temp_line = Line(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), i, j);
-        array_with_lines1.push_back(temp_line);
-    } else if (floor(secondpoint / isoline_value) == ceil(firstpoint / isoline_value)) {
-        Line temp_line = Line(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), i, j);
-        array_with_lines1.push_back(temp_line);
-    }
-}
-
 void generate_line_v2(Point point1, Point point2, double firstpoint, double secondpoint, int i, int j, string pt1,
                       string pt2) {
 
@@ -144,57 +118,6 @@ void generate_line_v2(Point point1, Point point2, double firstpoint, double seco
     } else if (floor(secondpoint / isoline_value) == ceil(firstpoint / isoline_value)) {
         Linev2 temp_line = Linev2(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), pt1, pt2);
         linecell_array[i][j].lines.push_back(temp_line);
-    }
-}
-
-void recognize_type_of_line(int state, LineCell cell, int i, int j, std::vector<Line> array_with_lines1) {
-    switch (state) {
-        case 1:
-            generate_line(cell.pointc, cell.pointd, cell.bottomleft, cell.topright, i, j, array_with_lines1);
-            break;
-        case 2:
-            generate_line(cell.pointb, cell.pointc, cell.topleft, cell.bottomright, i, j, array_with_lines1);
-            break;
-        case 3:
-            generate_line(cell.pointb, cell.pointd, cell.topright, cell.bottomleft, i, j, array_with_lines1);
-            break;
-        case 4:
-            generate_line(cell.pointa, cell.pointb, cell.topright, cell.bottomleft, i, j, array_with_lines1);
-            break;
-        case 5:
-            generate_line(cell.pointa, cell.pointd, cell.topleft, cell.bottomleft, i, j, array_with_lines1);
-            generate_line(cell.pointb, cell.pointc, cell.bottomright, cell.topright, i, j, array_with_lines1);
-            break;
-        case 6:
-            generate_line(cell.pointa, cell.pointc, cell.topleft, cell.topright, i, j, array_with_lines1);
-            break;
-        case 7:
-            generate_line(cell.pointa, cell.pointd, cell.topleft, cell.topright, i, j, array_with_lines1);
-            break;
-        case 8:
-            generate_line(cell.pointa, cell.pointd, cell.topleft, cell.bottomright, i, j, array_with_lines1);
-            break;
-        case 9:
-            generate_line(cell.pointa, cell.pointc, cell.topleft, cell.bottomright, i, j, array_with_lines1);
-            break;
-        case 10:
-            generate_line(cell.pointa, cell.pointb, cell.topright, cell.bottomright, i, j, array_with_lines1);
-            generate_line(cell.pointc, cell.pointd, cell.bottomleft, cell.topleft, i, j, array_with_lines1);
-            break;
-        case 11:
-            generate_line(cell.pointa, cell.pointb, cell.topright, cell.bottomleft, i, j, array_with_lines1);
-            break;
-        case 12:
-            generate_line(cell.pointb, cell.pointd, cell.topright, cell.bottomright, i, j, array_with_lines1);
-            break;
-
-        case 13:
-            generate_line(cell.pointb, cell.pointc, cell.bottomright, cell.topleft, i, j, array_with_lines1);
-            break;
-
-        case 14:
-            generate_line(cell.pointc, cell.pointd, cell.bottomleft, cell.topright, i, j, array_with_lines1);
-            break;
     }
 }
 
@@ -342,23 +265,6 @@ int findMin(int a, int b, int c, int d) {
 
 int getState(int a, int b, int c, int d) {
     return a * 8 + b * 4 + c * 2 + d * 1;
-}
-
-void checkValues(LineCell cell, int i, int j, std::vector<Line> array_with_lines1) {
-    double topl = floor(cell.topleft / isoline_value);
-    double topr = floor(cell.topright / isoline_value);
-    double botl = floor(cell.bottomleft / isoline_value);
-    double botr = floor(cell.bottomright / isoline_value);
-    if (topl == topr && topr == botl && botl == botr) { ;
-    } else {
-        int minvalue = findMin(topl, topr, botl, botr);
-        int topleft = ceil(topl / minvalue) - 1;
-        int topright = ceil(topr / minvalue) - 1;
-        int bottomleft = ceil(botl / minvalue) - 1;
-        int bottomright = ceil(botr / minvalue) - 1;
-        int result = getState(topleft, topright, bottomright, bottomleft);
-        recognize_type_of_line(result, cell, i, j, array_with_lines1);
-    }
 }
 
 void checkValuesv2(LineCell cell, int i, int j) {
@@ -736,8 +642,6 @@ void Grid::create_raster(liblas::Header header) {
         pNewDS = pDriverTiff->Create(output,x_length,y_length,1,GDT_Float32,NULL);
         pNewDS->SetGeoTransform(transform);
         float *newwRow = (float*) CPLMalloc(sizeof(float)*x_length);
-
-// Uzupełnianie komórek rastra
         for(int i=0;i<y_length;i++){
             for(int j=0;j<x_length;j++){
                 newwRow[j] = cell_array[i][j].value;
