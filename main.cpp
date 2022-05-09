@@ -1,18 +1,18 @@
 #include <iostream>
 #include <string>
-#include <fstream>
+//#include <fstream>
 #include <liblas/liblas.hpp>
-#include <filesystem>
+//#include <filesystem>
 #include <gdal/gdal.h>
 #include "gdal/gdal_priv.h"
-#include "gdal/cpl_conv.h" // for CPLMalloc()
+//#include "gdal/cpl_conv.h" // for CPLMalloc()
 #include "grid.h"
 #include "structures.h"
-#include "gdal/cpl_string.h"
+//#include "gdal/cpl_string.h"
 #include "gdal/ogrsf_frmts.h"
 #include <cmath>
 #include "json.hpp"
-#include "omp.h"
+//#include "omp.h"
 
 
 using json = nlohmann::json;
@@ -21,7 +21,7 @@ int x_length;
 int y_length;
 std::vector<std::vector<Cell>> cell_array;
 std::vector<std::vector<LineCell>> linecell_array;
-std::vector<Linev2> array_with_lines;
+std::vector<Line> array_with_lines;
 GDALDataset *poDStest;
 double isoline_value = 3;
 GDALDriver *poDrivertest;

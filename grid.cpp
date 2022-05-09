@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <gdal/gdal.h>
 #include "gdal/gdal_priv.h"
-#include "gdal/cpl_conv.h" // for CPLMalloc()
+#include "gdal/cpl_conv.h"
 #include "gdal/ogrsf_frmts.h"
 
-using namespace std;
+//using namespace std;
 extern double cellsize;
 extern int x_length;
 extern int y_length;
@@ -17,7 +17,7 @@ double R;
 extern std::vector<std::vector<Cell>> cell_array;
 extern std::vector<std::vector<LineCell>> linecell_array;
 extern double isoline_value;
-extern std::vector<Linev2> array_with_lines;
+extern std::vector<Line> array_with_lines;
 extern OGRLayer *poLayertest;
 
 int dominant_value(){
@@ -62,7 +62,7 @@ void Grid::generateGrid(liblas::Header header) {
     };
     double end = omp_get_wtime();
     double elapsed = end - start;
-    cout << "elapsed generate grid = " << elapsed << endl;
+    std::cout << "elapsed generate grid = " << elapsed << std::endl;
 }
 
 void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader) {
@@ -87,7 +87,7 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
     }
     clock_t end = clock();
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    cout << "elapsed distance_beetween_points = " << elapsed << endl;
+    std::cout << "elapsed distance_beetween_points = " << elapsed << std::endl;
 }
 
 void Grid::check_if_point_belongs_to_neighbours(int x, int y, liblas::Point p) {
@@ -110,10 +110,10 @@ void generate_line(Point point1, Point point2, double firstpoint, double secondp
                       string pt2) {
 
     if (floor(firstpoint / isoline_value) == ceil(secondpoint / isoline_value)) {
-        Linev2 temp_line = Linev2(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), pt1, pt2);
+        Line temp_line = Line(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), pt1, pt2);
         linecell_array[i][j].lines.push_back(temp_line);
     } else if (floor(secondpoint / isoline_value) == ceil(firstpoint / isoline_value)) {
-        Linev2 temp_line = Linev2(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), pt1, pt2);
+        Line temp_line = Line(point1, point2, (floor(firstpoint / isoline_value) * isoline_value), pt1, pt2);
         linecell_array[i][j].lines.push_back(temp_line);
     }
 }
@@ -213,7 +213,7 @@ void Grid::check_if_every_cell_has_value() {
     }
     double end = omp_get_wtime();
     double elapsed = end - start;
-    cout << "elapsed push_back_line_to_array every value " << elapsed << endl;
+    std::cout << "elapsed push_back_line_to_array every value " << elapsed << std::endl;
 }
 
 void Grid::inverse_distance_weighting_algorithm() {
@@ -250,7 +250,7 @@ void Grid::inverse_distance_weighting_algorithm() {
     }
     double end = omp_get_wtime();
     double elapsed = end - start;
-    cout << "elapsed idw " << elapsed << endl;
+    std::cout << "elapsed idw " << elapsed << std::endl;
 }
 
 int findMin(int a, int b, int c, int d) {
@@ -569,12 +569,11 @@ void Grid::check_how_it_looks() {
     }
     double end = omp_get_wtime();
     double elapsed = end - start;
-    cout << "elapsed check_how_it_looks " << elapsed << endl;
+    std::cout << "elapsed check_how_it_looks " << elapsed << std::endl;
 }
 
 
 void Grid::set_important_values_for_every_linecell(liblas::Header header) {
-    std::vector<Line> array_with_lines1;
     double start = omp_get_wtime();
 //#pragma omp parallel private (array_with_lines1)
 //    {
@@ -603,14 +602,13 @@ void Grid::set_important_values_for_every_linecell(liblas::Header header) {
         }
     double end = omp_get_wtime();
     double elapsed = double(end - start);
-    cout << "elapsed set_important_values_for_every_linecell = " << elapsed << endl;
+    std::cout << "elapsed set_important_values_for_every_linecell = " << elapsed << std::endl;
 }
 
 void Grid::create_raster(liblas::Header header) {
     GDALDataset *pNewDS;
     GDALDriver *pDriverTiff;
     char const * output = "/home/saxatachi/Desktop/neww.tif";
-
     double transform[6];
     transform[0] = header.GetMinX();
     transform[1] = 0.5;
