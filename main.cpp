@@ -1,19 +1,13 @@
 #include <iostream>
 #include <string>
-//#include <fstream>
 #include <liblas/liblas.hpp>
-//#include <filesystem>
 #include <gdal/gdal.h>
 #include "gdal/gdal_priv.h"
-//#include "gdal/cpl_conv.h" // for CPLMalloc()
 #include "grid.h"
 #include "structures.h"
-//#include "gdal/cpl_string.h"
 #include "gdal/ogrsf_frmts.h"
 #include <cmath>
 #include "json.hpp"
-//#include "omp.h"
-
 
 using json = nlohmann::json;
 double cellsize = 0.5;

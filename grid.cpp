@@ -2,8 +2,6 @@
 #include "grid.h"
 #include "structures.h"
 #include <omp.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <gdal/gdal.h>
 #include "gdal/gdal_priv.h"
 #include "gdal/cpl_conv.h"
