@@ -14,7 +14,7 @@ public:
     void inverse_distance_weighting_algorithm();
     void set_important_values_for_every_linecell(liblas::Header);
     void check_if_point_belongs_to_neighbours(int x,int y,liblas::Point);
-    void checkeveryvalue();
+    void check_if_every_cell_has_value();
     void check_how_it_looks();
     void create_raster(liblas::Header);
 

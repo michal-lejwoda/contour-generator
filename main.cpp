@@ -21,10 +21,9 @@ int x_length;
 int y_length;
 std::vector<std::vector<Cell>> cell_array;
 std::vector<std::vector<LineCell>> linecell_array;
-std::vector<Line> array_with_lines;
-std::vector<Linev2> temp_array_with_lines;
+std::vector<Linev2> array_with_lines;
 GDALDataset *poDStest;
-double isoline_value = 2;
+double isoline_value = 3;
 GDALDriver *poDrivertest;
 OGRLayer *poLayertest;
 
@@ -46,38 +45,13 @@ int main() {
     const char *pszDriverNametest = "ESRI Shapefile";
     poDrivertest = GetGDALDriverManager()->GetDriverByName(pszDriverNametest);
     poDStest = poDrivertest->Create("/home/saxatachi/Desktop/lines3.shp", 0, 0, 0, GDT_Unknown, NULL);
-    poLayertest = poDStest->CreateLayer("line_jeden", NULL, wkbLineString, NULL);
+    poLayertest = poDStest->CreateLayer("first_layer", NULL, wkbLineString, NULL);
     OGRFieldDefn oFieldtest("Value", OFTString);
     oFieldtest.SetWidth(32);
     poLayertest->CreateField(&oFieldtest);
     Grid grid;
     grid.mainfunctions(header, reader);
     GDALClose(poDStest);
-    GDALDataset *poDS1;
-    poDS1 = (GDALDataset *) GDALOpenEx("/home/saxatachi/Desktop/testaa.shp", GDAL_OF_VECTOR, NULL, NULL, NULL);
-    if (poDS1 == NULL) {
-        printf("Open failed.\n");
-        exit(1);
-    }
-    OGRLayer *poLayer1;
-    poLayer1 = poDS1->GetLayerByName("testaa");
-    std::vector<Line> temp_array;
-    temp_array.push_back(array_with_lines[0]);
-    vector<Line>::iterator it;
-    it = array_with_lines.begin();
-    array_with_lines.erase(it);
-    const char *pszDriverName = "ESRI Shapefile";
-    GDALDriver *poDriver;
-    poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName);
-    GDALDataset *poDS;
-    poDS = poDriver->Create("/home/saxatachi/Desktop/testjednejlinii.shp", 0, 0, 0, GDT_Unknown, NULL);
-    OGRLayer *poLayer;
-    poLayer = poDS->CreateLayer("line_out", NULL, wkbLineString, NULL);
-    OGRFieldDefn oField("Value", OFTString);
-    oField.SetWidth(32);
-    poLayer->CreateField(&oField);
-    GDALClose(poDS);
-
     return 0;
 
 }

@@ -16,17 +16,16 @@ extern int y_length;
 double R;
 extern std::vector<std::vector<Cell>> cell_array;
 extern std::vector<std::vector<LineCell>> linecell_array;
-extern std::vector<Line> array_with_lines;
 extern double isoline_value;
-extern std::vector<Linev2> temp_array_with_lines;
+extern std::vector<Linev2> array_with_lines;
 extern OGRLayer *poLayertest;
 
 int dominant_value(){
     int max = 0;
     int max_result = 0;
     map<int, int> mp;
-    for (int i = 0; i < temp_array_with_lines.size(); i++) {
-        mp[temp_array_with_lines[i].value] = mp[temp_array_with_lines[i].value]+=1;
+    for (int i = 0; i < array_with_lines.size(); i++) {
+        mp[array_with_lines[i].value] = mp[array_with_lines[i].value]+=1;
     }
     for (map<int,int>::iterator itr = mp.begin();itr != mp.end();++itr){
         if(itr->second > max){
@@ -41,7 +40,7 @@ void Grid::mainfunctions(liblas::Header header, liblas::Reader reader) {
     generateGrid(header);
     distance_beetween_points(header, reader);
     inverse_distance_weighting_algorithm();
-    checkeveryvalue();
+    check_if_every_cell_has_value();
     create_raster(header);
     set_important_values_for_every_linecell(header);
     check_how_it_looks();
@@ -51,10 +50,9 @@ void Grid::generateGrid(liblas::Header header) {
     double minx = header.GetMinX();
     double maxy = header.GetMaxY();
     double start = omp_get_wtime();
-#pragma omp parallel num_threads(12)
+    #pragma omp parallel num_threads(12)
     {
-
-#pragma omp for schedule(static)
+    #pragma omp for schedule(static)
         for (int i = 0; i < x_length; i++) {
             for (int j = 0; j < y_length; j++) {
                 cell_array[i][j].centerx = minx + (i * (cellsize)) + (cellsize / 2);
@@ -72,7 +70,6 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
     liblas::Point const &p = reader.GetPoint();
     int count = 0;
     clock_t start = clock();
-
     while (reader.ReadNextPoint()) {
 //        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
 //            count++;
@@ -109,7 +106,7 @@ void Grid::check_if_point_belongs_to_neighbours(int x, int y, liblas::Point p) {
     }
 }
 
-void generate_line_v2(Point point1, Point point2, double firstpoint, double secondpoint, int i, int j, string pt1,
+void generate_line(Point point1, Point point2, double firstpoint, double secondpoint, int i, int j, string pt1,
                       string pt2) {
 
     if (floor(firstpoint / isoline_value) == ceil(secondpoint / isoline_value)) {
@@ -121,57 +118,54 @@ void generate_line_v2(Point point1, Point point2, double firstpoint, double seco
     }
 }
 
-void recognize_type_of_linev2(int state, LineCell cell, int i, int j) {
+void recognize_type_of_line(int state, LineCell cell, int i, int j) {
     switch (state) {
         case 1:
-            generate_line_v2(cell.pointc, cell.pointd, cell.bottomleft, cell.topright, i, j, "c", "d");
+            generate_line(cell.pointc, cell.pointd, cell.bottomleft, cell.topright, i, j, "c", "d");
             break;
         case 2:
-            generate_line_v2(cell.pointb, cell.pointc, cell.topleft, cell.bottomright, i, j, "b", "c");
+            generate_line(cell.pointb, cell.pointc, cell.topleft, cell.bottomright, i, j, "b", "c");
             break;
         case 3:
-            generate_line_v2(cell.pointb, cell.pointd, cell.topright, cell.bottomleft, i, j, "b", "d");
+            generate_line(cell.pointb, cell.pointd, cell.topright, cell.bottomleft, i, j, "b", "d");
             break;
         case 4:
-            generate_line_v2(cell.pointa, cell.pointb, cell.topright, cell.bottomleft, i, j, "a", "b");
+            generate_line(cell.pointa, cell.pointb, cell.topright, cell.bottomleft, i, j, "a", "b");
             break;
         case 5:
-            generate_line_v2(cell.pointa, cell.pointd, cell.topleft, cell.bottomleft, i, j, "a", "d");
-            generate_line_v2(cell.pointb, cell.pointc, cell.bottomright, cell.topright, i, j, "b", "c");
+            generate_line(cell.pointa, cell.pointd, cell.topleft, cell.bottomleft, i, j, "a", "d");
+            generate_line(cell.pointb, cell.pointc, cell.bottomright, cell.topright, i, j, "b", "c");
             break;
         case 6:
-            generate_line_v2(cell.pointa, cell.pointc, cell.topleft, cell.topright, i, j, "a", "c");
+            generate_line(cell.pointa, cell.pointc, cell.topleft, cell.topright, i, j, "a", "c");
             break;
         case 7:
-            generate_line_v2(cell.pointa, cell.pointd, cell.topleft, cell.topright, i, j, "a", "d");
+            generate_line(cell.pointa, cell.pointd, cell.topleft, cell.topright, i, j, "a", "d");
             break;
         case 8:
-            generate_line_v2(cell.pointa, cell.pointd, cell.topleft, cell.bottomright, i, j, "a", "d");
+            generate_line(cell.pointa, cell.pointd, cell.topleft, cell.bottomright, i, j, "a", "d");
             break;
         case 9:
-            generate_line_v2(cell.pointa, cell.pointc, cell.topleft, cell.bottomright, i, j, "a", "c");
+            generate_line(cell.pointa, cell.pointc, cell.topleft, cell.bottomright, i, j, "a", "c");
             break;
         case 10:
-            generate_line_v2(cell.pointa, cell.pointb, cell.topright, cell.bottomright, i, j, "a", "b");
-            generate_line_v2(cell.pointc, cell.pointd, cell.bottomleft, cell.topleft, i, j, "c", "d");
+            generate_line(cell.pointa, cell.pointb, cell.topright, cell.bottomright, i, j, "a", "b");
+            generate_line(cell.pointc, cell.pointd, cell.bottomleft, cell.topleft, i, j, "c", "d");
             break;
         case 11:
-            generate_line_v2(cell.pointa, cell.pointb, cell.topright, cell.bottomleft, i, j, "a", "b");
+            generate_line(cell.pointa, cell.pointb, cell.topright, cell.bottomleft, i, j, "a", "b");
             break;
         case 12:
-            generate_line_v2(cell.pointb, cell.pointd, cell.topright, cell.bottomright, i, j, "b", "d");
+            generate_line(cell.pointb, cell.pointd, cell.topright, cell.bottomright, i, j, "b", "d");
             break;
-
         case 13:
-            generate_line_v2(cell.pointb, cell.pointc, cell.bottomright, cell.topleft, i, j, "b", "c");
+            generate_line(cell.pointb, cell.pointc, cell.bottomright, cell.topleft, i, j, "b", "c");
             break;
-
         case 14:
-            generate_line_v2(cell.pointc, cell.pointd, cell.bottomleft, cell.topright, i, j, "c", "d");
+            generate_line(cell.pointc, cell.pointd, cell.bottomleft, cell.topright, i, j, "c", "d");
             break;
     }
 }
-
 
 void calculate_average_cell_value(int x, int y, vector<double> temp_array) {
     double temp = 0;
@@ -206,7 +200,7 @@ double get_cell_value_from_the_closest_cells_with_value(int x, int y) {
     }
 }
 
-void Grid::checkeveryvalue() {
+void Grid::check_if_every_cell_has_value() {
     double start = omp_get_wtime();
     #pragma omp parallel
     #pragma omp for schedule(dynamic)
@@ -219,7 +213,7 @@ void Grid::checkeveryvalue() {
     }
     double end = omp_get_wtime();
     double elapsed = end - start;
-    cout << "elapsed check every value " << elapsed << endl;
+    cout << "elapsed push_back_line_to_array every value " << elapsed << endl;
 }
 
 void Grid::inverse_distance_weighting_algorithm() {
@@ -280,32 +274,30 @@ void checkValuesv2(LineCell cell, int i, int j) {
         int bottomleft = ceil(botl / minvalue) - 1;
         int bottomright = ceil(botr / minvalue) - 1;
         int result = getState(topleft, topright, bottomright, bottomleft);
-        recognize_type_of_linev2(result, cell, i, j);
+        recognize_type_of_line(result, cell, i, j);
     }
 }
 
-void check(int i,int j,string pt1,string pt2,int index){
+void push_back_line_to_array(int i,int j,string pt1,string pt2,int index){
     if (j - 1 >= 0 && (pt1 == "a" || pt2 == "a")) {
         for (int k = 0; k < linecell_array[i][j - 1].lines.size(); k++) {
             if (linecell_array[i][j - 1].lines[k].pt1 == "c" ||
                 linecell_array[i][j - 1].lines[k].pt2 == "c") {
                 if (linecell_array[i][j - 1].lines[k].pt1 == "c") {
-                    temp_array_with_lines.push_back(linecell_array[i][j - 1].lines[k]);
+                    array_with_lines.push_back(linecell_array[i][j - 1].lines[k]);
                     linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     if (j - 1 > 0) {
-                        return check(i, j - 1,linecell_array[i][j - 1].lines[k].pt1,linecell_array[i][j - 1].lines[k].pt2,k);
+                        return push_back_line_to_array(i, j - 1,linecell_array[i][j - 1].lines[k].pt1,linecell_array[i][j - 1].lines[k].pt2,k);
                     }
                 } else {
-                    Point temp1;
-                    temp1 = linecell_array[i][j - 1].lines[k].point1;
+                    Point temp;
+                    temp = linecell_array[i][j - 1].lines[k].point1;
                     linecell_array[i][j - 1].lines[k].point1 = linecell_array[i][j - 1].lines[k].point2;
-                    linecell_array[i][j - 1].lines[k].point2 = temp1;
-                    temp_array_with_lines.push_back(linecell_array[i][j - 1].lines[k]);
-//                    if (linecell_array[i][j].lines.size() > 0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
-//                    }
+                    linecell_array[i][j - 1].lines[k].point2 = temp;
+                    array_with_lines.push_back(linecell_array[i][j - 1].lines[k]);
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     if (j - 1 > 0) {
-                        return check(i, j - 1,linecell_array[i][j - 1].lines[k].pt2,linecell_array[i][j - 1].lines[k].pt1,k);
+                        return push_back_line_to_array(i, j - 1,linecell_array[i][j - 1].lines[k].pt2,linecell_array[i][j - 1].lines[k].pt1,k);
                     }
                 }
 
@@ -319,24 +311,21 @@ void check(int i,int j,string pt1,string pt2,int index){
             if (linecell_array[i + 1][j].lines[k].pt1 == "d" ||
                 linecell_array[i + 1][j].lines[k].pt2 == "d") {
                 if (linecell_array[i + 1][j].lines[k].pt1 == "d") {
-                    temp_array_with_lines.push_back(linecell_array[i + 1][j].lines[k]);
-//                    if (linecell_array[i][j].lines.size() > 0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
-//                    }
+                    array_with_lines.push_back(linecell_array[i + 1][j].lines[k]);
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     if (i + 1 < x_length - 1) {
-                        return check(i + 1, j,linecell_array[i + 1][j].lines[k].pt1,linecell_array[i + 1][j].lines[k].pt2,k);
+                        return push_back_line_to_array(i + 1, j,linecell_array[i + 1][j].lines[k].pt1,linecell_array[i + 1][j].lines[k].pt2,k);
                     }
                 } else {
-                    Point temp1;
-                    temp1 = linecell_array[i + 1][j].lines[k].point1;
+                    Point temp;
+                    temp = linecell_array[i + 1][j].lines[k].point1;
                     linecell_array[i + 1][j].lines[k].point1 = linecell_array[i + 1][j].lines[k].point2;
-                    linecell_array[i + 1][j].lines[k].point2 = temp1;
-                    temp_array_with_lines.push_back(linecell_array[i + 1][j].lines[k]);
-//                    if (linecell_array[i][j].lines.size() > 0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
-//                    }
+                    linecell_array[i + 1][j].lines[k].point2 = temp;
+                    array_with_lines.push_back(linecell_array[i + 1][j].lines[k]);
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+
                     if (i + 1 < x_length - 1) {
-                        return check(i + 1, j,linecell_array[i + 1][j].lines[k].pt2,linecell_array[i + 1][j].lines[k].pt1,k);
+                        return push_back_line_to_array(i + 1, j,linecell_array[i + 1][j].lines[k].pt2,linecell_array[i + 1][j].lines[k].pt1,k);
                     }
                 }
 
@@ -350,24 +339,20 @@ void check(int i,int j,string pt1,string pt2,int index){
             if (linecell_array[i][j + 1].lines[k].pt1 == "a" ||
                 linecell_array[i][j + 1].lines[k].pt2 == "a") {
                 if (linecell_array[i][j + 1].lines[k].pt1 == "a") {
-                    temp_array_with_lines.push_back(linecell_array[i][j + 1].lines[k]);
-//                    if (linecell_array[i][j].lines.size() > 0) {
+                    array_with_lines.push_back(linecell_array[i][j + 1].lines[k]);
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
-//                    }
                     if (j + 1 < y_length - 1) {
-                        return check(i, j + 1,linecell_array[i][j + 1].lines[k].pt1,linecell_array[i][j + 1].lines[k].pt2,k);
+                        return push_back_line_to_array(i, j + 1,linecell_array[i][j + 1].lines[k].pt1,linecell_array[i][j + 1].lines[k].pt2,k);
                     }
                 } else {
-                    Point temp1;
-                    temp1 = linecell_array[i][j + 1].lines[k].point1;
+                    Point temp;
+                    temp = linecell_array[i][j + 1].lines[k].point1;
                     linecell_array[i][j + 1].lines[k].point1 = linecell_array[i][j + 1].lines[k].point2;
-                    linecell_array[i][j + 1].lines[k].point2 = temp1;
-                    temp_array_with_lines.push_back(linecell_array[i][j + 1].lines[k]);
-//                    if (linecell_array[i][j].lines.size() > 0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
-//                    }
+                    linecell_array[i][j + 1].lines[k].point2 = temp;
+                    array_with_lines.push_back(linecell_array[i][j + 1].lines[k]);
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     if (j + 1 < y_length - 1) {
-                        return check(i, j + 1,linecell_array[i][j + 1].lines[k].pt2,linecell_array[i][j + 1].lines[k].pt1,k);
+                        return push_back_line_to_array(i, j + 1,linecell_array[i][j + 1].lines[k].pt2,linecell_array[i][j + 1].lines[k].pt1,k);
                     }
                 }
 
@@ -380,21 +365,19 @@ void check(int i,int j,string pt1,string pt2,int index){
             if (linecell_array[i - 1][j].lines[k].pt1 == "b" ||
                 linecell_array[i - 1][j].lines[k].pt2 == "b") {
                 if (linecell_array[i - 1][j].lines[k].pt1 == "b") {
-                    temp_array_with_lines.push_back(linecell_array[i - 1][j].lines[k]);
+                    array_with_lines.push_back(linecell_array[i - 1][j].lines[k]);
                     if (linecell_array[i][j].lines.size() > 0) {
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     }
-                    return check(i - 1, j,linecell_array[i - 1][j].lines[k].pt1,linecell_array[i - 1][j].lines[k].pt2,k);
+                    return push_back_line_to_array(i - 1, j,linecell_array[i - 1][j].lines[k].pt1,linecell_array[i - 1][j].lines[k].pt2,k);
                 } else {
-                    Point temp1;
-                    temp1 = linecell_array[i - 1][j].lines[k].point1;
+                    Point temp;
+                    temp = linecell_array[i - 1][j].lines[k].point1;
                     linecell_array[i - 1][j].lines[k].point1 = linecell_array[i - 1][j].lines[k].point2;
-                    linecell_array[i - 1][j].lines[k].point2 = temp1;
-                    temp_array_with_lines.push_back(linecell_array[i - 1][j].lines[k]);
-//                    if (linecell_array[i][j].lines.size() > 0) {
-                        linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
-//                    }
-                    return check(i - 1, j,linecell_array[i - 1][j].lines[k].pt2,linecell_array[i - 1][j].lines[k].pt1,k);
+                    linecell_array[i - 1][j].lines[k].point2 = temp;
+                    array_with_lines.push_back(linecell_array[i - 1][j].lines[k]);
+                    linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
+                    return push_back_line_to_array(i - 1, j,linecell_array[i - 1][j].lines[k].pt2,linecell_array[i - 1][j].lines[k].pt1,k);
                 }
 
 
@@ -406,30 +389,30 @@ void check(int i,int j,string pt1,string pt2,int index){
     }
 }
 
-void check_erase(int i,int j,string pt1,string pt2,int index){
+void push_front_line_to_array(int i,int j,string pt1,string pt2,int index){
     if (j - 1 >= 0 && (pt1 == "a" || pt2 == "a")) {
         for (int k = 0; k < linecell_array[i][j - 1].lines.size(); k++) {
             if (linecell_array[i][j - 1].lines[k].pt1 == "c" ||
                 linecell_array[i][j - 1].lines[k].pt2 == "c") {
                 if (linecell_array[i][j - 1].lines[k].pt2 == "c") {
-                    temp_array_with_lines.insert(temp_array_with_lines.begin(),linecell_array[i][j-1].lines[k]);
+                    array_with_lines.insert(array_with_lines.begin(),linecell_array[i][j-1].lines[k]);
                     if(linecell_array[i][j].lines.size()>0){
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     }
                     if (j - 1 > 0) {
-                        return check_erase(i, j - 1,linecell_array[i][j - 1].lines[k].pt1,linecell_array[i][j - 1].lines[k].pt2,k);
+                        return push_front_line_to_array(i, j - 1,linecell_array[i][j - 1].lines[k].pt1,linecell_array[i][j - 1].lines[k].pt2,k);
                     }
                 } else {
-                    Point temp1;
-                    temp1 = linecell_array[i][j - 1].lines[k].point1;
+                    Point temp;
+                    temp = linecell_array[i][j - 1].lines[k].point1;
                     linecell_array[i][j - 1].lines[k].point1 = linecell_array[i][j - 1].lines[k].point2;
-                    linecell_array[i][j - 1].lines[k].point2 = temp1;
-                    temp_array_with_lines.insert(temp_array_with_lines.begin(),linecell_array[i][j-1].lines[k]);
+                    linecell_array[i][j - 1].lines[k].point2 = temp;
+                    array_with_lines.insert(array_with_lines.begin(),linecell_array[i][j-1].lines[k]);
                     if(linecell_array[i][j].lines.size()>0){
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     }
                     if (j - 1 > 0) {
-                        return check_erase(i, j - 1,linecell_array[i][j - 1].lines[k].pt2,linecell_array[i][j - 1].lines[k].pt1,k);
+                        return push_front_line_to_array(i, j - 1,linecell_array[i][j - 1].lines[k].pt2,linecell_array[i][j - 1].lines[k].pt1,k);
                     }
                 }
             }
@@ -441,24 +424,24 @@ void check_erase(int i,int j,string pt1,string pt2,int index){
             if (linecell_array[i + 1][j].lines[k].pt1 == "d" ||
                 linecell_array[i + 1][j].lines[k].pt2 == "d") {
                 if (linecell_array[i + 1][j].lines[k].pt2 == "d") {
-                    temp_array_with_lines.insert(temp_array_with_lines.begin(),linecell_array[i+1][j].lines[k]);
+                    array_with_lines.insert(array_with_lines.begin(),linecell_array[i+1][j].lines[k]);
                     if(linecell_array[i][j].lines.size()>0){
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     }
                     if (i + 1 < x_length - 1) {
-                        return check_erase(i + 1, j,linecell_array[i + 1][j].lines[k].pt1,linecell_array[i + 1][j].lines[k].pt2,k);
+                        return push_front_line_to_array(i + 1, j,linecell_array[i + 1][j].lines[k].pt1,linecell_array[i + 1][j].lines[k].pt2,k);
                     }
                 } else {
-                    Point temp1;
-                    temp1 = linecell_array[i + 1][j].lines[k].point1;
+                    Point temp;
+                    temp = linecell_array[i + 1][j].lines[k].point1;
                     linecell_array[i + 1][j].lines[k].point1 = linecell_array[i + 1][j].lines[k].point2;
-                    linecell_array[i + 1][j].lines[k].point2 = temp1;
-                    temp_array_with_lines.insert(temp_array_with_lines.begin(),linecell_array[i+1][j].lines[k]);
+                    linecell_array[i + 1][j].lines[k].point2 = temp;
+                    array_with_lines.insert(array_with_lines.begin(),linecell_array[i+1][j].lines[k]);
                     if(linecell_array[i][j].lines.size()>0){
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     }
                     if (i + 1 < x_length - 1) {
-                        return check_erase(i + 1, j,linecell_array[i + 1][j].lines[k].pt2,linecell_array[i + 1][j].lines[k].pt1,k);
+                        return push_front_line_to_array(i + 1, j,linecell_array[i + 1][j].lines[k].pt2,linecell_array[i + 1][j].lines[k].pt1,k);
                     }
                 }
 
@@ -472,25 +455,25 @@ void check_erase(int i,int j,string pt1,string pt2,int index){
             if (linecell_array[i][j + 1].lines[k].pt1 == "a" ||
                 linecell_array[i][j + 1].lines[k].pt2 == "a") {
                 if (linecell_array[i][j + 1].lines[k].pt2 == "a") {
-                    temp_array_with_lines.insert(temp_array_with_lines.begin(),linecell_array[i][j + 1].lines[k]);
+                    array_with_lines.insert(array_with_lines.begin(),linecell_array[i][j + 1].lines[k]);
                     if(linecell_array[i][j].lines.size()>0){
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     }
                     if (j + 1 < y_length - 1) {
-                        return check_erase(i, j + 1,linecell_array[i][j + 1].lines[k].pt1,linecell_array[i][j + 1].lines[k].pt2,k);
+                        return push_front_line_to_array(i, j + 1,linecell_array[i][j + 1].lines[k].pt1,linecell_array[i][j + 1].lines[k].pt2,k);
                     }
                 }
                 else {
-                    Point temp1;
-                    temp1 = linecell_array[i][j + 1].lines[k].point1;
+                    Point temp;
+                    temp = linecell_array[i][j + 1].lines[k].point1;
                     linecell_array[i][j + 1].lines[k].point1 = linecell_array[i][j + 1].lines[k].point2;
-                    linecell_array[i][j + 1].lines[k].point2 = temp1;
-                    temp_array_with_lines.insert(temp_array_with_lines.begin(),linecell_array[i][j + 1].lines[k]);
+                    linecell_array[i][j + 1].lines[k].point2 = temp;
+                    array_with_lines.insert(array_with_lines.begin(),linecell_array[i][j + 1].lines[k]);
                     if(linecell_array[i][j].lines.size()>0){
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     }
                     if (j + 1 < y_length - 1) {
-                        return check_erase(i, j + 1,linecell_array[i][j + 1].lines[k].pt2,linecell_array[i][j + 1].lines[k].pt1,k);
+                        return push_front_line_to_array(i, j + 1,linecell_array[i][j + 1].lines[k].pt2,linecell_array[i][j + 1].lines[k].pt1,k);
                     }
                 }
 
@@ -503,22 +486,22 @@ void check_erase(int i,int j,string pt1,string pt2,int index){
             if (linecell_array[i - 1][j].lines[k].pt1 == "b" ||
                 linecell_array[i - 1][j].lines[k].pt2 == "b") {
                 if (linecell_array[i - 1][j].lines[k].pt2 == "b") {
-                    temp_array_with_lines.insert(temp_array_with_lines.begin(),linecell_array[i-1][j].lines[k]);
+                    array_with_lines.insert(array_with_lines.begin(),linecell_array[i-1][j].lines[k]);
                     if(linecell_array[i][j].lines.size()>0){
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
                     }
-                    return check_erase(i - 1, j,linecell_array[i - 1][j].lines[k].pt1,linecell_array[i - 1][j].lines[k].pt2,k);
+                    return push_front_line_to_array(i - 1, j,linecell_array[i - 1][j].lines[k].pt1,linecell_array[i - 1][j].lines[k].pt2,k);
                 } else {
-                    Point temp1;
-                    temp1 = linecell_array[i - 1][j].lines[k].point1;
+                    Point temp;
+                    temp = linecell_array[i - 1][j].lines[k].point1;
                     linecell_array[i - 1][j].lines[k].point1 = linecell_array[i - 1][j].lines[k].point2;
-                    linecell_array[i - 1][j].lines[k].point2 = temp1;
-                    temp_array_with_lines.insert(temp_array_with_lines.begin(),linecell_array[i-1][j].lines[k]);
+                    linecell_array[i - 1][j].lines[k].point2 = temp;
+                    array_with_lines.insert(array_with_lines.begin(),linecell_array[i-1][j].lines[k]);
                     if(linecell_array[i][j].lines.size()>0){
                         linecell_array[i][j].lines.erase(linecell_array[i][j].lines.begin() + index);
 
                     }
-                    return check_erase(i - 1, j,linecell_array[i - 1][j].lines[k].pt2,linecell_array[i - 1][j].lines[k].pt1,k);
+                    return push_front_line_to_array(i - 1, j,linecell_array[i - 1][j].lines[k].pt2,linecell_array[i - 1][j].lines[k].pt1,k);
                 }
             }
         }
@@ -534,9 +517,9 @@ void add_feature_to_shapefile(){
     OGRFeature *poFeature9;
     poFeature9 = OGRFeature::CreateFeature(poLayertest->GetLayerDefn());
     poFeature9->SetField("Value", dominant_value());
-    for (int i = 0; i < temp_array_with_lines.size(); i++) {
-        ls.addPoint(temp_array_with_lines[i].point1.x, temp_array_with_lines[i].point1.y);
-        ls.addPoint(temp_array_with_lines[i].point2.x, temp_array_with_lines[i].point2.y);
+    for (int i = 0; i < array_with_lines.size(); i++) {
+        ls.addPoint(array_with_lines[i].point1.x, array_with_lines[i].point1.y);
+        ls.addPoint(array_with_lines[i].point2.x, array_with_lines[i].point2.y);
     }
     poFeature9->SetGeometry(&ls);
     poLayertest->CreateFeature(poFeature9);
@@ -549,38 +532,38 @@ void Grid::check_how_it_looks() {
         for (int j = 0; j < y_length - 1; j++) {
             int temp_var = 0;
                 if (linecell_array[i][j].lines.size() > 0) {
-                    temp_array_with_lines.push_back(linecell_array[i][j].lines[0]);
+                    array_with_lines.push_back(linecell_array[i][j].lines[0]);
                     if(linecell_array[i][j].lines[0].pt1 == "a" ||linecell_array[i][j].lines[0].pt2 == "a"){
-                        check(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
+                        push_back_line_to_array(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
                         temp_var++;
                     }
                     if(linecell_array[i][j].lines[0].pt1 == "b" ||linecell_array[i][j].lines[0].pt2 == "b"){
                         if(temp_var>0 && temp_var<2){
-                            check_erase(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
+                            push_front_line_to_array(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
                         }else {
-                            check(i, j, linecell_array[i][j].lines[0].pt1, linecell_array[i][j].lines[0].pt2, 0);
+                            push_back_line_to_array(i, j, linecell_array[i][j].lines[0].pt1, linecell_array[i][j].lines[0].pt2, 0);
                         }
                         temp_var++;
                     }
                     if(linecell_array[i][j].lines[0].pt1 == "c" ||linecell_array[i][j].lines[0].pt2 == "c"){
                         if(temp_var>0 && temp_var<2){
-                            check_erase(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
+                            push_front_line_to_array(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
 
                         }else {
-                            check(i, j, linecell_array[i][j].lines[0].pt1, linecell_array[i][j].lines[0].pt2, 0);
+                            push_back_line_to_array(i, j, linecell_array[i][j].lines[0].pt1, linecell_array[i][j].lines[0].pt2, 0);
                         }
                         temp_var++;
                     }
                     if(linecell_array[i][j].lines[0].pt1 == "d" ||linecell_array[i][j].lines[0].pt2 == "d"){
                         if(temp_var>0 && temp_var<2){
-                            check_erase(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
+                            push_front_line_to_array(i, j,linecell_array[i][j].lines[0].pt1,linecell_array[i][j].lines[0].pt2,0);
                         }else {
-                            check(i, j, linecell_array[i][j].lines[0].pt1, linecell_array[i][j].lines[0].pt2, 0);
+                            push_back_line_to_array(i, j, linecell_array[i][j].lines[0].pt1, linecell_array[i][j].lines[0].pt2, 0);
                         }
                         temp_var++;
                     }
                     add_feature_to_shapefile();
-                    temp_array_with_lines.clear();
+                    array_with_lines.clear();
             }
         }
     }
@@ -624,12 +607,9 @@ void Grid::set_important_values_for_every_linecell(liblas::Header header) {
 }
 
 void Grid::create_raster(liblas::Header header) {
-    GDALDataset  *poDataset;
     GDALDataset *pNewDS;
     GDALDriver *pDriverTiff;
-    char const * pszFilename = "/home/saxatachi/Desktop/inter_raster.tif";
     char const * output = "/home/saxatachi/Desktop/neww.tif";
-    poDataset = (GDALDataset *) GDALOpen( pszFilename, GA_ReadOnly );
     double transform[6];
     transform[0] = header.GetMinX();
     transform[1] = 0.5;
@@ -647,7 +627,13 @@ void Grid::create_raster(liblas::Header header) {
         }
         pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,x_length,1,newwRow,y_length,1,GDT_Float32,0,0);
     }
-    GDALClose(poDataset);
+//    for(int i=0;i<y_length;i++){
+//        for(int j=0;j<x_length;j++){
+//            newwRow[j] = cell_array[i][j].value;
+//        }
+//        pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,x_length,1,newwRow,y_length,1,GDT_Float32,0,0);
+//    }
+//    GDALClose(poDataset);
     GDALClose(pNewDS);
 }
 
