@@ -610,6 +610,7 @@ void Grid::create_raster(liblas::Header header) {
     GDALDataset *pNewDS;
     GDALDriver *pDriverTiff;
     char const * output = "/home/saxatachi/Desktop/neww.tif";
+
     double transform[6];
     transform[0] = header.GetMinX();
     transform[1] = 0.5;
