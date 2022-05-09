@@ -7,7 +7,6 @@
 #include "gdal/cpl_conv.h"
 #include "gdal/ogrsf_frmts.h"
 
-//using namespace std;
 extern double cellsize;
 extern int x_length;
 extern int y_length;
@@ -573,9 +572,6 @@ void Grid::check_how_it_looks() {
 
 void Grid::set_important_values_for_every_linecell(liblas::Header header) {
     double start = omp_get_wtime();
-//#pragma omp parallel private (array_with_lines1)
-//    {
-//#pragma omp for schedule(static)
         for (int i = 0; i < x_length - 1; i++) {
             for (int j = 0; j < y_length - 1; j++) {
                 linecell_array[i][j].topleft = cell_array[i][j].value;
@@ -624,13 +620,6 @@ void Grid::create_raster(liblas::Header header) {
         }
         pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,x_length,1,newwRow,y_length,1,GDT_Float32,0,0);
     }
-//    for(int i=0;i<y_length;i++){
-//        for(int j=0;j<x_length;j++){
-//            newwRow[j] = cell_array[i][j].value;
-//        }
-//        pNewDS->GetRasterBand(1)->RasterIO(GF_Write,0,i,x_length,1,newwRow,y_length,1,GDT_Float32,0,0);
-//    }
-//    GDALClose(poDataset);
     GDALClose(pNewDS);
 }
 
