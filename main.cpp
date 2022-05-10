@@ -26,8 +26,8 @@ int main() {
     cout.precision(15);
     std::ifstream ifs;
 //    ifs.open("/home/saxatachi/las_data/points13v2.las", std::ios::in | std::ios::binary);
-//    ifs.open("/home/saxatachi/las_data/points800v2.las", std::ios::in | std::ios::binary);
-    ifs.open("/home/saxatachi/las_data/punkty_z_domami.las", std::ios::in | std::ios::binary);
+    ifs.open("/home/saxatachi/las_data/points800v2.las", std::ios::in | std::ios::binary);
+//    ifs.open("/home/saxatachi/las_data/punkty_z_domami.las", std::ios::in | std::ios::binary);
 //    ifs.open("/home/saxatachi/las_data/test_lidar.las", std::ios::in | std::ios::binary);
     liblas::ReaderFactory f;
     liblas::Reader reader = f.CreateWithStream(ifs);

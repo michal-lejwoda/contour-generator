@@ -38,9 +38,9 @@ void Grid::mainfunctions(liblas::Header header, liblas::Reader reader) {
     distance_beetween_points(header, reader);
     inverse_distance_weighting_algorithm();
     check_if_every_cell_has_value();
-    create_raster(header);
+//    create_raster(header);
     set_important_values_for_every_linecell(header);
-    check_how_it_looks();
+    connect_lines();
 }
 
 void Grid::generateGrid(liblas::Header header) {
@@ -523,7 +523,7 @@ void add_feature_to_shapefile(){
     poLayertest->SetFeature(poFeature9);
 }
 
-void Grid::check_how_it_looks() {
+void Grid::connect_lines() {
     double start = omp_get_wtime();
     for (int i = 0; i < x_length - 1; i++) {
         for (int j = 0; j < y_length - 1; j++) {
@@ -566,7 +566,7 @@ void Grid::check_how_it_looks() {
     }
     double end = omp_get_wtime();
     double elapsed = end - start;
-    std::cout << "elapsed check_how_it_looks " << elapsed << std::endl;
+    std::cout << "elapsed connect_lines " << elapsed << std::endl;
 }
 
 
