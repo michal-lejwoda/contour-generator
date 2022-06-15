@@ -68,11 +68,6 @@ void Grid::distance_beetween_points(liblas::Header header, liblas::Reader reader
     int count = 0;
     clock_t start = clock();
     while (reader.ReadNextPoint()) {
-//        if (p.GetClassification().GetClass() == 0 or p.GetClassification().GetClass() == 2) {
-//            count++;
-//        } else {
-//            continue;
-//        }
         if (p.GetClassification().GetClass() == 2) {
             count++;
         } else {
